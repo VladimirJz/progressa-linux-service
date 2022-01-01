@@ -111,14 +111,15 @@ class Session():
         #print (request.routine)
         #print (params)
         #result=self._execute_routine(ROUTINE,to_dict=True)
-        result=self._run(routine,params)
-        print(result)
+        resultset=self._run(routine,params)
+        raw_data = self.fetch_raw(resultset) 
+        print(resultset)
         # with connections['core'].cursor() as cursor:       
         #     cursor.callproc(request.routine,params)
         #     raw_data = self.fetch_raw(cursor) 
             
 
-        return result
+        return raw_data
 
 
         
@@ -173,11 +174,18 @@ class Session():
             logger.error("MySQL: Lost connection whit ["+  self.db_name +  "] ")
             exit()
         #cursor=db.cursor()
+        print(routine)
+        print(params)
         try:
             #cursor.callproc(routine,params)
-            with db.cursor() as cursor:  
+            with db.cursor(dictionary=True) as cursor:  
                 cursor.callproc(routine,params)
-                print('tupoCursor:',cursor)
+                for result in cursor.stored_results():
+                    pass
+                #    r
+            
+                #print(rows)
+                #print('tupoCursor:',rows)
         except mysql.connector.Error as err:
             print(err)
             message="MySQL: On Execute ["+ routine + "] >" +str(err)    
@@ -186,7 +194,8 @@ class Session():
         else: 
             message='MySQL:[' + routine  + '] executed sucessfully.'
             logger.info(message)
-        return cursor.fetchall()
+        return result
+
 
     
     def _execute_routine(self,routine,to_dict=False):

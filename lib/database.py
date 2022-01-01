@@ -19,7 +19,7 @@ class Repository():
                     {'order':'3',
                      'name':'OrigenID',
                      'type':'int',
-                      'default':'0',
+                      'default':0,
                      'required':False
                     },
                                         
