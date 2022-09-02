@@ -1,0 +1,4 @@
+.env/
+modules/__pycache__/core.cpython-310.pyc
+__pycache__/main.cpython-310.pyc
+__pycache__/service.cpython-310.pyc
