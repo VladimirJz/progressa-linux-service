@@ -99,7 +99,7 @@ USR1_KILL_SIGNAL_SET = False
 ############################
 
 DB_NAME='microfin'
-DB_HOST='localhost'
+DB_HOST='10.186.22.37'
 DB_USER='root'
 DB_PASS='Vostro1310'
 END_POINT='http://api2.bodesa.com/endpoint/'
