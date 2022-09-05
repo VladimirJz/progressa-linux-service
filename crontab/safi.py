@@ -13,7 +13,7 @@ from datetime import datetime
 
 
 import logging
-from modules import safi 
+#from modules import safi 
 
 logger = logging.getLogger(f"main.{__name__}")
 #logging.basicConfig(filename="log.txt", level=logging.DEBUG)
@@ -113,7 +113,8 @@ class Session():
         db=self.connect()
         cursor=db.cursor(dictionary=True)
         cursor.execute('call PGS_MAESTROSALDOS') 
-        result=cursor.fetchall()
+        result=dict(cursor.fetchall())
+        print(type)
         return result
            
 
