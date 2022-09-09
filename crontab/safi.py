@@ -103,7 +103,7 @@ class Session():
 
 
   
-    def bulk_data(self,type):
+    def bulk_data(self):
         args=list()
         args.append(1)
         API_ENDPOINT='https://httpbin.org/post'
@@ -112,9 +112,12 @@ class Session():
         #cursor.execute('SELECT * from USUARIOS')
         db=self.connect()
         cursor=db.cursor(dictionary=True)
-        cursor.execute('call PGS_MAESTROSALDOS') 
-        result=dict(cursor.fetchall())
-        print(type)
+        #cursor.execute('SELECT ClienteID,NombreCompleto,Sexo,RFC from CLIENTES limit 3;') 
+        cursor.execute('CALL PGS_MAESTROSALDOS(1)') 
+
+        print('execute')
+        result=cursor.fetchall()
+        #print(type)
         return result
            
 
@@ -153,7 +156,6 @@ class Session():
             db_connection.close()
         logger.info(message)
         return success_connection
-
 
 
     def connect(self):

@@ -3,3 +3,5 @@ modules/__pycache__/core.cpython-310.pyc
 __pycache__/main.cpython-310.pyc
 __pycache__/service.cpython-310.pyc
 log.txt
+crontab/saldos.txt
+crontab/__pycache__/safi.cpython-310.pyc

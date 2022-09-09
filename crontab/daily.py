@@ -7,6 +7,7 @@ import sys
 import safi
 
 
+import csv
 
 
 
@@ -14,11 +15,11 @@ FTP_HOST='10.90.0.76'
 FTP_USER='pgsftpusr'
 FTP_PASS='Progressa2022-'
 FTP_DIR=' /var/www/html/progressa/reportes_entrada_safi'
-
 ftp = ftplib.FTP(FTP_HOST, FTP_USER, FTP_PASS)
 # force UTF-8 encoding
 ftp.encoding = "utf-8"
 
+filename = "saldos.txt"
 
 def main(**kwargs):
     """
@@ -28,25 +29,44 @@ def main(**kwargs):
         This sample code intentionally crashes once in a while to show what
         happens when your code raises an exception
     """
-    db=safi.Session(db_user='app',db_pass='Vostro1310',db_host='10.186.22.35',db_name='microfin')
+    db=safi.Session(db_user='root',db_pass='Vostro1310',db_host='localhost',db_name='microfinprogressa')
     if db.is_available :
-        data=db.bulk_data
-        with open("saldos.txt", "w") as file:
-            for row in data :
-                file.write(row)   
+        data=db.bulk_data()
+        print(type(data))
+        print(data)
+        #print(data)
+        l=[]
+        for row in data:
+            l.append( [i for i in row.values()])
+        print(l)
+   
+        with open(filename, 'w') as f:  
+            writer = csv.writer(f, delimiter ='|')          
+            writer.writerows(l)
+    
+           # l=[]
+            #for row in data:
+             #   l = [i for i in row.values()]
+              #  print(type(l))
+               # print(l) # lista
+
+        
+ 
     else:
-        print('no available')
+        print('ERROR AL CONECTAR CON LA BASE DE DATOS')
 
         
 
-  
-
-
-
     # local file name you want to upload
-    filename = "saldos.txt"
-    with open(filename, "rb") as file:
-        # use FTP's STOR command to upload the file
-        ftp.storbinary(f"STOR {filename}", file) 
-
+    ftp_message=''
+    try:
+        with open(filename, "rb") as file:
+            # use FTP's STOR command to upload the file
+            ftp_message=ftp.storbinary(f"STOR {filename}", file) 
+    except:
+        print('ERROR:' + ftp_message)
+        print('ERROR AL CONECTAR CON SERVIDOR FTP!')
+        print('===================================')
+    else:
+        print('ARCHIVO CARGADO EXITOSAMENTE')
 main()

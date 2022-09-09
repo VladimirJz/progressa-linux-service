@@ -111,7 +111,7 @@ class Session():
         logger.info("Ultima transaccion: " + str(last_id))
         #cursor.execute('SELECT * from USUARIOS')
         db=self.connect()
-        cursor=db.cursor(dictionary=True)
+        cursor=db.cursor()
         cursor.execute('call PGS_MAESTROSALDOS') 
         result=cursor.fetchall()
         return result
