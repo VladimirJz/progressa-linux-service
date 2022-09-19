@@ -4,16 +4,12 @@ from modules import safi
 
 logger = logging.getLogger(f"main.{__name__}")
 logging.basicConfig(filename="log.txt", level=logging.DEBUG)
-# Keeps track of hom many times main() has run
+
 RUN=0
 
 def main(**kwargs):
     """
-        This is an example of code you want to run on every iteration
-        You can, and probably should move this to its own Python module
-
-        This sample code intentionally crashes once in a while to show what
-        happens when your code raises an exception
+       Rutina
     """
     db=safi.Session(**kwargs)
     logger.info(type(db))
