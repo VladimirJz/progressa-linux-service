@@ -100,6 +100,7 @@ USR1_KILL_SIGNAL_SET = False
 
 DB_NAME='microfin'
 DB_HOST='10.186.22.37'
+DB_PORT=3308
 DB_USER='root'
 DB_PASS='Vostro1310'
 END_POINT='http://api2.bodesa.com/endpoint/'
@@ -117,9 +118,9 @@ if DEBUG:
 else:
     logger.setLevel(logging.INFO)
 
-########################
-# Kill Signal Handlers #
-########################
+###########################
+# Handler para el SIGTERM #
+###########################
 
 def signal_handler(*_):
     logger.debug("\nExiting...")
@@ -218,7 +219,7 @@ while True:
     try:
  
 
-        main(db_name=DB_NAME,db_host=DB_HOST,db_user=DB_USER,db_pass=DB_PASS)
+        main(db_name=DB_NAME,db_host=DB_HOST,db_user=DB_USER,db_pass=DB_PASS,db_port=DB_PORT)
 
     except Exception:
         logger.error(format_exc_for_journald(traceback.format_exc(), indent_lines=False))

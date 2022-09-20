@@ -16,6 +16,12 @@ FTP_USER='pgsftpusr'
 FTP_PASS='Progressa2022-'
 FTP_DIR=' /var/www/html/progressa/reportes_entrada_safi'
 ftp = ftplib.FTP(FTP_HOST, FTP_USER, FTP_PASS)
+DB_NAME='microfin'
+DB_HOST='10.186.22.164'
+DB_USER='root'
+DB_PASS='Vostro1310'
+DB_PORT=3308
+
 # force UTF-8 encoding
 ftp.encoding = "utf-8"
 
@@ -29,7 +35,7 @@ def main(**kwargs):
         This sample code intentionally crashes once in a while to show what
         happens when your code raises an exception
     """
-    db=safi.Session(db_user='root',db_pass='Vostro1310',db_host='localhost',db_name='microfinprogressa')
+    db=safi.Session(db_user=DB_USER,db_pass=DB_PASS,db_host=DB_HOST,db_name=DB_NAME,db_port=DB_PORT)
     if db.is_available :
         data=db.bulk_data()
         print(type(data))

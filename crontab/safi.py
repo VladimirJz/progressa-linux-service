@@ -61,6 +61,16 @@ class Session():
     def db_host(self,value):
         self._db_host=value
     
+
+    @property
+    def db_port(self):
+        return self._db_port
+    @db_port.setter
+    def db_port(self,value):
+        self._db_port=value
+    
+
+
     @property
     def db_strcon(self):
         return self._db_strcon
@@ -106,14 +116,14 @@ class Session():
     def bulk_data(self):
         args=list()
         args.append(1)
-        API_ENDPOINT='https://httpbin.org/post'
-        last_id=self.service.get(LAST_TRASACCTION_ID)
-        logger.info("Ultima transaccion: " + str(last_id))
+        #API_ENDPOINT='https://httpbin.org/post'
+        #last_id=self.service.get(LAST_TRASACCTION_ID)
+        #logger.info("Ultima transaccion: " + str(last_id))
         #cursor.execute('SELECT * from USUARIOS')
         db=self.connect()
         cursor=db.cursor(dictionary=True)
         #cursor.execute('SELECT ClienteID,NombreCompleto,Sexo,RFC from CLIENTES limit 3;') 
-        cursor.execute('CALL PGS_MAESTROSALDOS(1)') 
+        cursor.execute("call PGS_MAESTROSALDOS('G','',0,'N') ") 
 
         print('execute')
         result=cursor.fetchall()
@@ -131,6 +141,8 @@ class Session():
         self.db_user=kwargs.pop('db_user')
         self.db_pass=kwargs.pop('db_pass')
         self.db_host=kwargs.pop('db_host')
+        self.db_port=kwargs.pop('db_port')
+
         self.db_strcon=self._set_strconx()
 
         self=is_available=self._is_available()
@@ -181,7 +193,8 @@ class Session():
         str_cnx=dict( user=self.db_user,
                                     password=self.db_pass,
                                     host=self.db_host,
-                                    database=self.db_name)
+                                    database=self.db_name,
+                                    port=self.db_port)
         print (str_cnx)
         return str_cnx
 

@@ -9,9 +9,10 @@ logging.basicConfig(filename="log.txt", level=logging.DEBUG)
 RUN=0
 
 DB_NAME='microfin'
-DB_HOST='10.186.22.37'
+DB_HOST='10.186.22.164'
 DB_USER='root'
 DB_PASS='Vostro1310'
-END_POINT='http://api2.bodesa.com/endpoint/'
+DB_PORT=3308
+END_POINT='http://localhost:8000/bodesa/api/saldosdetalle/'
 
-main(db_name=DB_NAME,db_host=DB_HOST,db_user=DB_USER,db_pass=DB_PASS)
+main(db_name=DB_NAME,db_host=DB_HOST,db_port=3308,db_user=DB_USER,db_pass=DB_PASS)

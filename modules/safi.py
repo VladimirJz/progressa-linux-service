@@ -19,7 +19,7 @@ logger = logging.getLogger(f"main.{__name__}")
 #logging.basicConfig(filename="log.txt", level=logging.DEBUG)
 LAST_TRASACCTION_ID="SELECT savings_transaccion_id from SAFI"
 CLIENTS_LIST="select Distinct ClienteID from CUENTASAHOMOV cm inner join CUENTASAHO c on c.CuentaAhoID=cm.CuentaAhoID   where cm.NumTransaccion>70000"
-DB_FILE='/opt/progressa/data.db'
+DB_FILE='data.db'
 class service_stats():
     def get(self,sql_command):
         with sqlite3.connect(DB_FILE) as data:
@@ -31,6 +31,7 @@ class service_stats():
 
 
 class Session():
+    REQUESTS_HEADER = {'Content-type': 'application/json'}
     service=service_stats()
     
     @property
@@ -60,7 +61,15 @@ class Session():
     @db_host.setter
     def db_host(self,value):
         self._db_host=value
+
+    @property
+    def db_port(self):
+        return self._db_port
+    @db_port.setter
+    def db_port(self,value):
+        self._db_port=value
     
+
     @property
     def db_strcon(self):
         return self._db_strcon
@@ -87,26 +96,27 @@ class Session():
         #type=kwargs.pop('type')
         args=list()
         args.append(1)
-        API_ENDPOINT='https://httpbin.org/post'
+        API_ENDPOINT='http://localhost:8000/bodesa/api/saldosdetalle/'
         last_id=self.service.get(LAST_TRASACCTION_ID)
         logger.info("Ultima transaccion: " + str(last_id))
         #cursor.execute('SELECT * from USUARIOS')
         db=self.connect()
         cursor=db.cursor(dictionary=True)
-        cursor.execute('call PGS_MAESTROSALDOS') 
+        cursor.execute("call PGS_MAESTROSALDOS('I','T',556,'S') ") 
         result=cursor.fetchall()
         for row in result:
             app_json = json.dumps(row,cls=CustomEncoder)
             print(app_json)
-            r = requests.post(url = API_ENDPOINT, data = app_json)
-            print(r)
+
+            r = requests.post(url = API_ENDPOINT, data = app_json,headers=self.REQUESTS_HEADER)
+            print(r.status_code)
 
 
   
     def bulk_data(self,type):
         args=list()
         args.append(1)
-        API_ENDPOINT='https://httpbin.org/post'
+        API_ENDPOINT='http://localhost:8000/bodesa/api/saldosdetalle/'
         last_id=self.service.get(LAST_TRASACCTION_ID)
         logger.info("Ultima transaccion: " + str(last_id))
         #cursor.execute('SELECT * from USUARIOS')
@@ -127,6 +137,7 @@ class Session():
         self.db_user=kwargs.pop('db_user')
         self.db_pass=kwargs.pop('db_pass')
         self.db_host=kwargs.pop('db_host')
+        self.db_port=kwargs.pop('db_port')
         self.db_strcon=self._set_strconx()
 
         self=is_available=self._is_available()
@@ -175,10 +186,11 @@ class Session():
         return db_connection #success_connection
 
     def _set_strconx(self):
-        str_cnx=dict( user=self.db_user,
-                                    password=self.db_pass,
-                                    host=self.db_host,
-                                    database=self.db_name)
+        str_cnx=dict(   user=self.db_user,
+                        password=self.db_pass,
+                        host=self.db_host,
+                        database=self.db_name,
+                        port=self.db_port)
         print (str_cnx)
         return str_cnx
 
