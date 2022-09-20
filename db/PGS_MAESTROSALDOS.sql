@@ -1,7 +1,7 @@
-delimiter ; 
+delimiter ;
 drop procedure if exists PGS_MAESTROSALDOS;
 DELIMITER $$
-CREATE PROCEDURE `PGS_MAESTROSALDOS`(
+CREATE DEFINER=`root`@`%` PROCEDURE `PGS_MAESTROSALDOS`(
 Par_Tipo CHAR,
 Par_Instrumento CHAR,
 Par_OrigenID BIGINT,
@@ -21,13 +21,6 @@ TerminaStore: BEGIN
     DECLARE Instrumento_Transaccion char;
 	
 
-    --
-    
-    
-    
-    
-    
-
 	--  SQL
 	DECLARE SQL_QUERY varchar(16000);
 	DECLARE CREATE_TABLE varchar(500);
@@ -41,12 +34,14 @@ TerminaStore: BEGIN
     SET Instrumento_Transaccion='T';
     
     SET Entero_Cero=0;
-    
     SET Valor_No='N';
     SET Reporte_Global='G';
+    
+	-- BEGIN
 
-    SET Par_Consolidado=coalesce(Par_Consolidado,Valor_No);
+	SET Par_Consolidado=coalesce(Par_Consolidado,Valor_No);
 	SET Var_FechaSistema=(SELECT FechaSistema from PARAMETROSSIS);
+	
 	-- Table
     DROP TABLE IF EXISTS lista_creditos;
     CREATE TEMPORARY TABLE lista_creditos
@@ -76,7 +71,7 @@ TerminaStore: BEGIN
             ELSE   
 				BEGIN
 					INSERT INTO lista_creditos
-						SELECT distinct CreditoID from CREDITOSMOVS where FechaOperacion=Var_FechaSistema and  NumTransaccion>=Par_OrigenID;
+						SELECT distinct CreditoID from CREDITOSMOVS where /*FechaOperacion=Var_FechaSistema and */ NumTransaccion>=Par_OrigenID;
                 END;
             END CASE;
         END;
@@ -102,7 +97,7 @@ TerminaStore: BEGIN
 		ORIPDTO 		varchar(50),
 		PLAZOMAX 		int,
 		IDPROGSSA 		int,
-		CTAPROGSSA 		varchar(50),
+		CTAPROGSSA 		int(50),
 		SERIEPGSSA 		varchar(50),
 		TDASUCPGSA 		int,
 		TPOCTAPGSA 		int,
@@ -171,7 +166,7 @@ INSERT INTO generales_credito
 	SELECT  
 	c.CreditoID ,c.ClienteID,
 	c.ProductoCreditoID as IDPDTO,' ' as ORIPDTO, (c.FechaVencimien  - c.FechaInicio ) as PLAZOMAX, 
-	coalesce(ec.ClienteIDCte,c.ClienteID)as IDPROGSSA ,'' as CTAPROGSSA,	'' as SERIEPGSSA,
+	coalesce(ec.ClienteIDCte,c.ClienteID)as IDPROGSSA , 0 as CTAPROGSSA,	'' as SERIEPGSSA,
 	c.SucursalID as TDASUCPGSA,0 as TPOCTAPGSA,coalesce( l.Autorizado ,c.MontoCredito  )as LIMITE ,
 	coalesce( l.SaldoDisponible  ,0  )as MONTODIS,
 	 (c.SaldoCapVigent + c.SaldoCapAtrasad +c.SaldoCapVencido +c. SaldCapVenNoExi ) as SDOCTA ,
@@ -400,9 +395,9 @@ IF(Par_Tipo=Reporte_Global)THEN
 	END;
 ELSE
 	BEGIN
-		select '' as FolioActualizacion, 'SAFI' as SistemaOriginaActividad, 'SAFI' UsuarioOriginaActividad , ''  FechaHoraCreaRegistro, '' NumeroPersonaElemento,
-		'' NumeroPersonaElementoProgressa,'' NivenAcumulado , ''Segmento , ORIPDTO OrigenProducto, '' IdProducto,
-		'' Negocio, CTAPROGSSA Cuenta, SERIEPGSSA Serie, TDASUCPGSA NumeroTienda, '' TipoCuenta,
+		select '' as FolioActualizacion, 'SAFI' as SistemaOriginaActividad, 'SAFI' UsuarioOriginaActividad , ''  FechaHoraCreaRegistro,  0 NumeroPersonaElemento,
+		0  NumeroPersonaElementoProgressa,'' NivenAcumulado , ''Segmento , ORIPDTO OrigenProducto, '' IdProducto,
+		0 Negocio, CTAPROGSSA Cuenta, SERIEPGSSA Serie, TDASUCPGSA NumeroTienda, '' TipoCuenta,
 		'' GrupoTasa , PLAZOMAX PlazoMaximo, IDPROGSSA IdentificadorProgressa, '' CuentraProgressa,'' SerieCuentaProgressa,
 		0 NumeroSucursalProgressa, TPOCTAPGSA TipoCuentaProgressa, '' EstatusCuenta, LIMITE LimiteCredito, '0.00' PorcentajeLimiteDisponible,
 		'' CapacidadPago, '' CapacidadDisponible, '' CapacidadPagoProductoFinanciero,'' CapacidadPagoPFUsado, '' MotoParaDisponer,
