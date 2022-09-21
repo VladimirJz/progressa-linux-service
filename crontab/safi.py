@@ -9,6 +9,10 @@ import json
 import requests
 from decimal import *
 from datetime import datetime
+from sys import exit
+import csv
+from os import path
+import  ftplib
 
 
 
@@ -85,6 +89,17 @@ class Session():
     def is_available(self,value):
         self._is_available=value
 
+    def __init__(self,**kwargs):
+        self.db_name=kwargs.pop('dbname')
+        self.db_user=kwargs.pop('dbuser')
+        self.db_pass=kwargs.pop('dbpassword')
+        self.db_host=kwargs.pop('dbhost')
+        self.db_port=kwargs.pop('dbport')
+        self.db_strcon=self._set_strconx()
+        print('_init_'+ str(self._testConnection()))
+        self._is_available=self._testConnection()
+        #is_available=self._testConnection()
+
     
     def is_connected(self):
         if self.connect():
@@ -111,62 +126,98 @@ class Session():
             r = requests.post(url = API_ENDPOINT, data = app_json)
             print(r)
 
-
-  
-    def bulk_data(self):
-        args=list()
-        args.append(1)
-        #API_ENDPOINT='https://httpbin.org/post'
-        #last_id=self.service.get(LAST_TRASACCTION_ID)
-        #logger.info("Ultima transaccion: " + str(last_id))
-        #cursor.execute('SELECT * from USUARIOS')
+    def _execute_routine(self,routine,to_dict=False):
         db=self.connect()
+        if(not db):
+            logger.error("MySQL: Lost connection whit ["+  self.db_name +  "] ")
+            exit()
         cursor=db.cursor(dictionary=True)
-        #cursor.execute('SELECT ClienteID,NombreCompleto,Sexo,RFC from CLIENTES limit 3;') 
-        cursor.execute("call PGS_MAESTROSALDOS('G','',0,'N') ") 
+        try:
+            cursor.execute(routine)
+            #db.commit()
 
+        except mysql.connector.Error as err:
+            print(err)
+            message="MySQL: On Execute ["+ routine + "] >" +str(err)
+    
+            logger.error(message)
+            return None
+        else: 
+            message='MySQL:[' + routine  + '] executed sucessfully.'
+            logger.info(message)
+       
+        return cursor.fetchall()
+        
+  
+    def bulk_data(self,to_list=False):
+        
+        def to_list():
+            l=[]
+            for row in result:
+                l.append( [i for i in row.values()])
+            return l
+
+        args=list()
+        ROUTINE="call PGS_MAESTROSALDOS('G','',0,'N') "
+        
+        args.append(1)
+        result=self._execute_routine(ROUTINE,to_dict=True)
+        if not result:
+            exit()
+        #-API_ENDPOINT='https://httpbin.org/post'
+        #-last_id=self.service.get(LAST_TRASACCTION_ID)
+        #-logger.info("Ultima transaccion: " + str(last_id))
+        #-cursor.execute('SELECT * from USUARIOS')
+        #db=self.connect()
+        #if(not db):
+        #    logger.error("Lost connection whit ["+  self.db_name +  "] ")
+        #    exit()
+        #cursor=db.cursor(dictionary=True)
+        #-cursor.execute('SELECT ClienteID,NombreCompleto,Sexo,RFC from CLIENTES limit 3;') 
+        #cursor.execute("call PGS_MAESTROSALDOS('G','',0,'N') ") 
+        #-cursor=db.cursor(dictionary=True)
+        #-curso
         print('execute')
-        result=cursor.fetchall()
-        #print(type)
-        return result
-           
+        #result=cursor.fetchall()
+        #-print(type)
+
+        if to_list:
+            return to_list()
+        else:  
+            return result
 
 
 
 
         
 
-    def __init__(self,**kwargs):
-        self.db_name=kwargs.pop('db_name')
-        self.db_user=kwargs.pop('db_user')
-        self.db_pass=kwargs.pop('db_pass')
-        self.db_host=kwargs.pop('db_host')
-        self.db_port=kwargs.pop('db_port')
 
-        self.db_strcon=self._set_strconx()
-
-        self=is_available=self._is_available()
 
 
    
-    def _is_available(self):
+    def _testConnection(self):
         success_connection=False
+        print('init:' + str(success_connection))
         try:
             db_connection=mysql.connector.connect(**self.db_strcon)
-            message="Conectado a la BD Exitosamente."
-            success_connection=True
+            message="MySQL: The database is available"
+            print(message)
+            success_connection= True
+            print('try')
 
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                message="Usuario o contraseña incorrecta."
+                message="MySQL: Authentication failed, wrong username or password"
+            
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                message="La base de datos no exists."
+                message="MySQL: The database [" +  self.db_name +  "] don't exists"
+            
             else:
                 message=err
+            logger.error(message)
             success_connection=False
         else:
-            db_connection.close()
-        logger.info(message)
+            logger.info(message)
         return success_connection
 
 
@@ -174,19 +225,21 @@ class Session():
         success_connection=False
         try:
             db_connection=mysql.connector.connect(**self.db_strcon)
-            message="Conectado a la BD Exitosamente."
+            message="MySQL: Database connection is open."
             success_connection=True
 
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                message="Usuario o contraseña incorrecta."
+                message="MySQL: Authentication failed, wrong username or password"
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                message="La base de datos no exists."
+                message="MySQL: The database [" +  self.db_name +  "] don't exists"
             else:
-                message=err
-        # else:
+                message=err        
+            logger.error(message)
+            return None
+        else:
         #     db_connection.close()
-        logger.info(message)
+            logger.info(message)
         return db_connection #success_connection
 
     def _set_strconx(self):
@@ -212,3 +265,44 @@ class CustomEncoder(json.JSONEncoder):
             return str(obj)
         # 👇️ otherwise use the default behavior
         return json.JSONEncoder.default(self, obj)
+
+class Utils:
+    def to_csv(data,filename):
+        with open(filename, 'w') as f:  
+            writer = csv.writer(f, delimiter ='|')          
+            writer.writerows(data)
+        if not path.exists(filename):
+            message="IO/OS: the file don't was generate."
+            logger.error(message)
+            return False
+        else:
+            message="IO/OS: Bulk data on ["+filename +"] file sucessfully."
+            logger.info(message)
+
+            
+        return True
+
+        
+    def ftp_upload(file,**kwargs):
+        ftp_user=kwargs.pop('ftpuser')
+        ftp_pass=kwargs.pop('ftppassword')
+        ftp_port=kwargs.pop('ftpport')
+        ftp_dir=kwargs.pop('ftpremotedir')
+        ftp_host=kwargs.pop('ftphost')
+        print(ftp_host + ftp_user + ftp_pass)
+        ftp = ftplib.FTP(ftp_host, ftp_user, ftp_pass)
+        ftp.encoding = "utf-8"
+        ftp_message=''
+        try:
+            with open(file, "rb") as f:
+                # use FTP's STOR command to upload the file
+                ftp_message=ftp.storbinary(f"STOR {file}", f) 
+        except:
+            print('ERROR:' + ftp_message)
+            print('ERROR AL CONECTAR CON SERVIDOR FTP!')
+            print('===================================')
+            return False
+        else:
+            print('ARCHIVO CARGADO EXITOSAMENTE')
+            return True
+        pass
