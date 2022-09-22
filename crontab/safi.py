@@ -164,35 +164,10 @@ class Session():
         result=self._execute_routine(ROUTINE,to_dict=True)
         if not result:
             exit()
-        #-API_ENDPOINT='https://httpbin.org/post'
-        #-last_id=self.service.get(LAST_TRASACCTION_ID)
-        #-logger.info("Ultima transaccion: " + str(last_id))
-        #-cursor.execute('SELECT * from USUARIOS')
-        #db=self.connect()
-        #if(not db):
-        #    logger.error("Lost connection whit ["+  self.db_name +  "] ")
-        #    exit()
-        #cursor=db.cursor(dictionary=True)
-        #-cursor.execute('SELECT ClienteID,NombreCompleto,Sexo,RFC from CLIENTES limit 3;') 
-        #cursor.execute("call PGS_MAESTROSALDOS('G','',0,'N') ") 
-        #-cursor=db.cursor(dictionary=True)
-        #-curso
-        print('execute')
-        #result=cursor.fetchall()
-        #-print(type)
-
         if to_list:
             return to_list()
         else:  
             return result
-
-
-
-
-        
-
-
-
 
    
     def _testConnection(self):
@@ -290,19 +265,30 @@ class Utils:
         ftp_dir=kwargs.pop('ftpremotedir')
         ftp_host=kwargs.pop('ftphost')
         print(ftp_host + ftp_user + ftp_pass)
-        ftp = ftplib.FTP(ftp_host, ftp_user, ftp_pass)
+        try:
+            ftp = ftplib.FTP(ftp_host, ftp_user, ftp_pass)
+        except ftplib.all_errors as e:
+            message='FTP:' + str(e) + ''
+            logger.error(message)
+            return False
+
+        else:
+            message='FTP:Open conection whit server'
+            logger.info(message)
         ftp.encoding = "utf-8"
         ftp_message=''
+        
         try:
             with open(file, "rb") as f:
                 # use FTP's STOR command to upload the file
-                ftp_message=ftp.storbinary(f"STOR {file}", f) 
-        except:
-            print('ERROR:' + ftp_message)
-            print('ERROR AL CONECTAR CON SERVIDOR FTP!')
-            print('===================================')
+                message= 'FTP:' +  ftp.storbinary(f"STOR {file}", f)
+                logger.Info(message)
+        except ftplib.all_errors as e:
+            message='FTP:' + str(e) + ''
+            logger.error(message)
             return False
         else:
-            print('ARCHIVO CARGADO EXITOSAMENTE')
+            message='FTP: File upload successfully'
+            logger.Info(message)
             return True
         pass

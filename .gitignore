@@ -5,4 +5,12 @@ __pycache__/main.cpython-310.pyc
 __pycache__/service.cpython-310.pyc
 log.txt
 crontab/saldos.txt
+crontab/__*
+modules/__pycache__/safi.cpython-310.pyc
 crontab/__pycache__/safi.cpython-310.pyc
+crontab/__pycache__/safi.cpython-310.pyc
+modules/__pycache__/safi.cpython-310.pyc
+crontab/daily.log
+crontab/jobs.log
+crontab/__pycache__/safi.cpython-310.pyc
+modules/__pycache__/safi.cpython-310.pyc

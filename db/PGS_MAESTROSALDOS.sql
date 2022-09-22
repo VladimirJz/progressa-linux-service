@@ -1,7 +1,7 @@
 delimiter ;
 drop procedure if exists PGS_MAESTROSALDOS;
-DELIMITER $$
-CREATE DEFINER=`root`@`%` PROCEDURE `PGS_MAESTROSALDOS`(
+delimiter $$
+CREATE PROCEDURE `PGS_MAESTROSALDOS`(
 Par_Tipo CHAR,
 Par_Instrumento CHAR,
 Par_OrigenID BIGINT,
@@ -36,7 +36,6 @@ TerminaStore: BEGIN
     SET Entero_Cero=0;
     SET Valor_No='N';
     SET Reporte_Global='G';
-    
 	-- BEGIN
 
 	SET Par_Consolidado=coalesce(Par_Consolidado,Valor_No);
@@ -105,9 +104,14 @@ TerminaStore: BEGIN
 		MONTODIS 		decimal(12,2),
 		SDOCTA			decimal(12,2),
 		VDO				decimal(12,2),
-		DIASVDO			int,
+
 		IFIN			decimal(12,2),
-		IMOR			decimal(12,2)
+		IMOR			decimal(12,2),
+        FCOMPRA			date,
+        PLAZO			varchar(300),
+        TASA			decimal(12,2),
+        ESTATUS			int,
+        NEGOCIOPGSSA    int
 			
 	);
 
@@ -154,36 +158,78 @@ CREATE TEMPORARY  TABLE credito_incumplimiento
 (
 	CreditoID 			int, 
 	FechaIncumplimiento date,
-    FechaVencidoActual 	date
+    FechaVencidoActual 	date,
+	DIASVDO				int,
+    PAGOSVENCIDOS		int,
+    NPARCIALIDAD		int
 );
+DROP TABLE IF EXISTS  credito_cuotas_activas;
+CREATE TEMPORARY TABLE credito_cuotas_activas
+(
+	CreditoID int, 
+    CuotaActual int,
+	CuotasAtraso int
+);
+
+-- CUENTA_PROGRESSA	NEGOCIO_PROGRESSA	FECHACOMPRA	PAGOSVENCIDOS	NUMERO DE PARCIALIDAD	PLAZO	TASA INTERES FINANCIERA	ESTATUS PROGRESSA
 
 
 -- Se definen las N bandas de capital vencido.
 INSERT  into bandas_vencido VALUES (1,1,30,'VDO30'),(2,31,60,'VDO60'),(3,61,90,'VDO90'),(4,91,99999999,'VDOM90');
 
--- agregar STATUS!='P'
+
+		#CreditoID 		int,
+		#ClienteID 		int,
+		#IDPDTO	 		int,
+		#ORIPDTO 		varchar(50),
+		#PLAZOMAX 		int,
+		#IDPROGSSA 		int,
+		#CTAPROGSSA 		int(50),
+		#SERIEPGSSA 		varchar(50),
+		#TDASUCPGSA 		int,
+		#TPOCTAPGSA 		int,
+		#LIMITE 			decimal(12,2),
+		#MONTODIS 		decimal(12,2),
+		#SDOCTA			decimal(12,2),
+		#VDO				decimal(12,2),
+		#DIASVDO			int,
+		#IFIN			decimal(12,2),
+		#IMOR			decimal(12,2),
+        #FCOMPRA			date,
+        #PLAZO			varchar(300),
+        #TASA			decimal(12,2),
+        #ESTATUS			decimal(12,2),
+        #NEGOCIOPGSSA    int
+        
+-- agregar STATUS!='P' ' ' as ORIPDTO  0 as CTAPROGSSA,	'' as SERIEPGSSA,0 as TPOCTAPGSA null as DIASVDO
 INSERT INTO generales_credito
+	(CreditoID, 	ClienteID, 	IDPDTO, 	
+	PLAZOMAX, 		IDPROGSSA,	TDASUCPGSA, 	
+	LIMITE, 		MONTODIS, 	SDOCTA, 	
+	VDO,			IFIN, 		IMOR, 		
+	FCOMPRA, 		PLAZO, 		TASA,
+    ESTATUS)
+
 	SELECT  
-	c.CreditoID ,c.ClienteID,
-	c.ProductoCreditoID as IDPDTO,' ' as ORIPDTO, (c.FechaVencimien  - c.FechaInicio ) as PLAZOMAX, 
-	coalesce(ec.ClienteIDCte,c.ClienteID)as IDPROGSSA , 0 as CTAPROGSSA,	'' as SERIEPGSSA,
-	c.SucursalID as TDASUCPGSA,0 as TPOCTAPGSA,coalesce( l.Autorizado ,c.MontoCredito  )as LIMITE ,
-	coalesce( l.SaldoDisponible  ,0  )as MONTODIS,
-	 (c.SaldoCapVigent + c.SaldoCapAtrasad +c.SaldoCapVencido +c. SaldCapVenNoExi ) as SDOCTA ,
-	(c.SaldoCapVencido + c.SaldoCapAtrasad ) VDO,
-    null as DIASVDO,
-    (SaldoInterProvi+SaldoInterAtras+SaldoInterVenc+SaldoIntNoConta) as IFIN,
-    (SaldoMoratorios+SaldoMoraVencido+SaldoMoraCarVen) as IMOR
-	FROM  EQU_CLIENTES  ec RIGHT JOIN  (PRODUCTOSCREDITO p  INNER JOIN 
-	(
-    (CREDITOS c INNER JOIN lista_creditos lc on c.CreditoID=lc.CreditoID)
-    LEFT JOIN LINEASCREDITO l  on c.LineaCreditoID=l.LineaCreditoID )
+	c.CreditoID,										c.ClienteID, 														c.ProductoCreditoID , 							
+	datediff(c.FechaVencimien,c.FechaInicio ), 			coalesce(ec.ClienteIDCte,c.ClienteID),								c.SucursalID,		
+	coalesce( l.Autorizado ,c.MontoCredito ), 			coalesce( l.SaldoDisponible  ,0  ), 								(c.SaldoCapVigent + c.SaldoCapAtrasad +c.SaldoCapVencido +c. SaldCapVenNoExi ),
+	(c.SaldoCapVencido + c.SaldoCapAtrasad ) ,			(SaldoInterProvi+SaldoInterAtras+SaldoInterVenc+SaldoIntNoConta),	(SaldoMoratorios+SaldoMoraVencido+SaldoMoraCarVen), 
+	c.FechaInicio,  									upper(DescInfinitivo),														TasaFija,
+    (case when c.Estatus='P' then 2  when c.Estatus='C' then 8  else 1 end)
+    
+	FROM  EQU_CLIENTES  ec RIGHT JOIN  (PRODUCTOSCREDITO p  
+	INNER JOIN ( CATFRECUENCIAS cf 
+	INNER JOIN ((CREDITOS c 
+	INNER JOIN lista_creditos lc on c.CreditoID=lc.CreditoID)
+    LEFT JOIN LINEASCREDITO l  on c.LineaCreditoID=l.LineaCreditoID ) on cf.FrecuenciaID=c.FrecuenciaCap)
 	on  c.ProductoCreditoID=p.ProducCreditoID) on ec.ClienteIDSAFI =c.ClienteID;
 
 
-
-INSERT INTO generales_cliente( ClienteID,IDELEMENTO,IDELEMENTOPSSA,RFC,CURP)
-	SELECT  distinct  c.ClienteID,'','', c.CURP, c.RFC from CLIENTES c  inner join generales_credito gc
+-- IDELEMENTO,IDELEMENTOPSSA,
+INSERT INTO generales_cliente( ClienteID,	RFC,	CURP)
+	SELECT  distinct  c.ClienteID, 			c.CURP, c.RFC 
+	from CLIENTES c  inner join generales_credito gc
 	on gc.ClienteID=c.ClienteID
     ;
     
@@ -194,10 +240,6 @@ INSERT INTO credito_incumplimiento(CreditoID,FechaIncumplimiento)
 	from EQU_CREDITOS ec inner join lista_creditos lc on ec.CreditoIDSAFI=lc.CreditoID
 	WHERE  COALESCE (FechaIncumplimiento,'1900-00-00')>'1900-00-00';
 
-
-
-
-    
     
 INSERT INTO credito_incumplimiento(CreditoID,FechaIncumplimiento)
 select   s.CreditoID,min(FechaCorte)FechaInumplimiento
@@ -205,7 +247,18 @@ select   s.CreditoID,min(FechaCorte)FechaInumplimiento
 	where  coalesce(CreditoIDSAFI,0)=0 and salCapAtrasado>0
 	group by CreditoID ;
 
+INSERT INTO credito_cuotas_activas(CreditoID,CuotaActual,CuotasAtraso)
+	select a.CreditoID,max(AmortizacionID),sum(case when Estatus in ('A','B') then 1 else 0 end) 
+	from AMORTICREDITO a inner join lista_creditos lc  on a.CreditoID=lc.CreditoID
+	where a.FechaInicio<=Var_FechaSistema
+	-- where a.FechaInicio<='2022-09-13'
+	and Estatus <>'P'
+	group by a.CreditoID;
+    
 
+
+
+    
 drop table if exists tmp_fecha_atraso_actual;
 create temporary table tmp_fecha_atraso_actual
 (
@@ -221,6 +274,11 @@ group by CreditoID;
 update tmp_fecha_atraso_actual fa inner join credito_incumplimiento fi on fa.CreditoID=fi.CreditoID
 SET fi.FechaVencidoActual=FechaAtraso;
 
+update credito_cuotas_activas ca 
+inner join credito_incumplimiento ci ON ca.CreditoID=ci.CreditoID
+SET ci.PAGOSVENCIDOS=CuotasAtraso,
+	ci.NPARCIALIDAD=CuotaActual,
+    ci.DIASVDO=datediff(Var_FechaSistema,coalesce(FechaVencidoActual,Var_FechaSistema));
 		
 INSERT INTO saldos_amortizacion 	
 	SELECT   a.CreditoID,AmortizacionID ,FechaExigible ,Estatus, (SaldoCapVigente +SaldoCapAtrasa +SaldoCapVencido  + SaldoCapVenNExi ) as SaldoCapital,			
@@ -378,14 +436,19 @@ left join credito_incumplimiento ci on gc.CreditoID=ci.CreditoID;
 
 IF(Par_Tipo=Reporte_Global)THEN
 	BEGIN
-		select '' as FOLIOUPD, 'SAFI' as SIORIREQ, 'SAFI' USRORIREQ , IDELEMENTO,'' IDELEPSSA,IDPDTO,
-		ORIPDTO,PLAZOMAX,IDPROGSSA,CTAPROGSSA,SERIEPGSSA,TDASUCPGSA,
-		TPOCTAPGSA,LIMITE,0 MONTOPDIS,SDOCTA,
-		coalesce(VDO,0)VDO,coalesce(VDO30,0)VDO30,coalesce(VDO60,0)VDO60,coalesce(VDO90,0)VDO90,coalesce(VDOM90,0)VDOM90,IFIN,IMOR,datediff(Var_FechaSistema,coalesce(FechaVencidoActual,Var_FechaSistema)) as DIASVDO, PAGOMES00,PAGOMES01,PAGOMES02,PAGOMES03,PAGOMES04,PAGOMES05,PAGOMES06,
-		PAGOMES07,PAGOMES08,PAGOMES09,PAGOMES10,PAGOMES11,PAGOMES12,
-		PAGOMES13, PAGOMES14, PAGOMES15,PAGOMES16, PAGOMES17, PAGOMES18,
-		'' FULTPACAP,'' FULTPAINT,'' FPRIMINCUM,gc.CreditoID PRESTAMOID, now()FEHODATOS, c.RFC,c.CURP ,
-		0 as LINEACREDITO
+		select '' as FOLIOUPD, 'SAFI' as SIORIREQ, 'SAFI' USRORIREQ , IDELEMENTO,'' IDELEPSSA,
+        IDPDTO,ORIPDTO,PLAZOMAX,IDPROGSSA,CTAPROGSSA,SERIEPGSSA,TDASUCPGSA,
+		TPOCTAPGSA,LIMITE,MONTODIS,SDOCTA,VDO,
+        coalesce(VDO30,0)VDO30,coalesce(VDO60,0)VDO60,coalesce(VDO90,0)VDO90,coalesce(VDOM90,0)VDOM90,IFIN,
+        IMOR,DIASVDO, PAGOMES00,PAGOMES01,PAGOMES02,
+        PAGOMES03,PAGOMES04,PAGOMES05,PAGOMES06,PAGOMES07,
+        PAGOMES08,PAGOMES09,PAGOMES10,PAGOMES11,PAGOMES12,
+		PAGOMES13, PAGOMES14, PAGOMES15,PAGOMES16, PAGOMES17, 
+        PAGOMES18,
+		'' FULTPACAP,'' FULTPAINT,'' FPRIMINCUM,gc.CreditoID PRESTAMOID, now()FEHODATOS, 
+        c.RFC,c.CURP ,0 as LINEACREDITO, CTAPROGSSA,8 as NEGOCIOPGSSA,
+        FCOMPRA,PAGOSVENCIDOS,NPARCIALIDAD,PLAZO,TASA,
+        ESTATUS
 
 		from 
 		saldo_pago_mes spm  right join  (generales_credito gc inner join generales_cliente c on gc.ClienteID=c.ClienteID )  on spm.CreditoID=gc.CreditoID  
@@ -395,7 +458,8 @@ IF(Par_Tipo=Reporte_Global)THEN
 	END;
 ELSE
 	BEGIN
-		select '' as FolioActualizacion, 'SAFI' as SistemaOriginaActividad, 'SAFI' UsuarioOriginaActividad , ''  FechaHoraCreaRegistro,  0 NumeroPersonaElemento,
+		
+        select '' as FolioActualizacion, 'SAFI' as SistemaOriginaActividad, 'SAFI' UsuarioOriginaActividad , ''  FechaHoraCreaRegistro,  0 NumeroPersonaElemento,
 		0  NumeroPersonaElementoProgressa,'' NivenAcumulado , ''Segmento , ORIPDTO OrigenProducto, '' IdProducto,
 		0 Negocio, CTAPROGSSA Cuenta, SERIEPGSSA Serie, TDASUCPGSA NumeroTienda, '' TipoCuenta,
 		'' GrupoTasa , PLAZOMAX PlazoMaximo, IDPROGSSA IdentificadorProgressa, '' CuentraProgressa,'' SerieCuentaProgressa,
@@ -421,5 +485,4 @@ END IF;
 
 
 
-END TerminaStore$$
-DELIMITER ;
+END TerminaStore##
