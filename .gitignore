@@ -14,3 +14,6 @@ crontab/daily.log
 crontab/jobs.log
 crontab/__pycache__/safi.cpython-310.pyc
 modules/__pycache__/safi.cpython-310.pyc
+lib/__pycache__/safi.cpython-310.pyc
+crontab/__pycache__/safi.cpython-310.pyc
+modules/__pycache__/safi.cpython-310.pyc

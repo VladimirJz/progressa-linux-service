@@ -267,6 +267,8 @@ class Utils:
         print(ftp_host + ftp_user + ftp_pass)
         try:
             ftp = ftplib.FTP(ftp_host, ftp_user, ftp_pass)
+            print(ftp_dir)
+            ftp.cwd(ftp_dir)
         except ftplib.all_errors as e:
             message='FTP:' + str(e) + ''
             logger.error(message)
