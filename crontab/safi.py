@@ -242,21 +242,38 @@ class CustomEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 class Utils:
-    def to_csv(data,filename):
-        with open(filename, 'w') as f:  
-            writer = csv.writer(f, delimiter ='|')          
+    def to_csv(data,**kwargs):
+        
+        current_date=datetime.now().strftime("%m%d%Y")
+        file_extension=kwargs.pop('fileformat')
+        field_separator=kwargs.pop('fieldseparator')
+        file_name=kwargs.pop('filename') + '_'+ current_date + '.' +file_extension
+        file_dir=kwargs.pop('directory')
+        full_filename=file_dir + '/' + file_name 
+
+        with open(full_filename, 'w') as f:  
+            writer = csv.writer(f, delimiter =field_separator)          
             writer.writerows(data)
-        if not path.exists(filename):
+        if not path.exists(full_filename):
             message="IO/OS: the file don't was generate."
             logger.error(message)
             return False
         else:
-            message="IO/OS: Bulk data on ["+filename +"] file sucessfully."
+            message="IO/OS: Bulk data on ["+full_filename +"] file sucessfully."
             logger.info(message)
 
             
-        return True
+        return full_filename
 
+
+    def get_filename(**kwargs):
+        file_name=kwargs.pop('filename')
+        file_extension=kwargs.pop('fileformat')
+        file_dir=kwargs.pop('directory')
+     
+        full_filename=file_dir + '/' + file_name + '' + file_extension
+        #file_separator=kwargs.pop('fieldseparator')
+        pass
         
     def ftp_upload(file,**kwargs):
         ftp_user=kwargs.pop('ftpuser')
@@ -264,6 +281,7 @@ class Utils:
         ftp_port=kwargs.pop('ftpport')
         ftp_dir=kwargs.pop('ftpremotedir')
         ftp_host=kwargs.pop('ftphost')
+        
         print(ftp_host + ftp_user + ftp_pass)
         try:
             ftp = ftplib.FTP(ftp_host, ftp_user, ftp_pass)

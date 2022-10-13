@@ -25,6 +25,7 @@ def load_settings():
     config.read(config_file)
     settings=dict(config.items('DATABASE'))
     settings.update(dict(config.items('FTP')))
+    settings.update(dict(config.items('SALDOSDIARIOS')))
     print(settings)
 
     return settings
@@ -34,16 +35,21 @@ config_file
 filename = "saldos.txt"
 
 def main(**kwargs):
-    file_name='saldos_dia.txt'
+    print()
+    #file_name='saldos_dia.txt'
+    #file_name=safi.Utils.get_filename(*kwargs)
+    #kwargs.pop('SaldosDiariosFileName') 
+
     db=safi.Session(**kwargs)
-    print('session')
-    print(db.is_available)
+    #print('session')
+    #print(db.is_available)
     if db.is_available :
-        print('available')
+        print('data base is available')
         data=db.bulk_data(to_list=True)
         print(type(data))
-        if(safi.Utils.to_csv(data,file_name)):
-            print('Ok')
+        file_name=safi.Utils.to_csv(data,**kwargs)
+        if(file_name):
+            print('File generated')
             if(safi.Utils.ftp_upload(file_name,**kwargs)):
                 message='FTP: Connection closed.'
                 logger.info(message)
