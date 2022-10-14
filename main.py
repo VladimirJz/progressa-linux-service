@@ -1,6 +1,6 @@
 from configparser import SafeConfigParser
 import logging
-from modules import safi
+from lib import safi
 
 logger = logging.getLogger(f"main.{__name__}")
 logging.basicConfig(filename="log.txt", level=logging.DEBUG)

@@ -49,7 +49,7 @@ import socket
 import time
 import traceback
 from main import main
-from lib import send_alert, format_exc_for_journald
+from lib.support import send_alert, format_exc_for_journald
 
 import configparser
 
@@ -97,6 +97,8 @@ USR1_KILL_SIGNAL_SET = False
 ############################
 # User Settings Variables  #
 ############################
+
+
 
 DB_NAME='microfin'
 DB_HOST='10.186.22.37'

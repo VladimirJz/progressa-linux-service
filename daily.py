@@ -37,24 +37,23 @@ config_file
 filename = "saldos.txt"
 
 def main(**kwargs):
-    print()
-    #file_name='saldos_dia.txt'
-    #file_name=safi.Utils.get_filename(*kwargs)
-    #kwargs.pop('SaldosDiariosFileName') 
+
 
     db=safi.Session(**kwargs)
-    #print('session')
-    #print(db.is_available)
+
     if db.is_available :
         print('data base is available')
         #direccion_cliente=db.Request.Client('address').add(ClienteID=cliente_pk,NumList=option)
         #raw_data=db.get(direccion_cliente)
-        data=db.bulk_data(to_list=True)
-        print(type(data))
+        saldos_globales=safi.Request.Integracion('saldos_diarios').add()
+        #data=db.bulk_data(to_list=True)
+        data=db.get(saldos_globales)
+        #print(type(data))
+        print(data)
         file=safi.Utils.to_csv(data,**kwargs)
         if(file):
             print('File generated')
-            if(safi.Utils.ftp_upload(file,**kwargs)):
+            if(safi.Utils.ftp_upload(fie,**kwargs)):
                 message='FTP: Connection closed.'
                 logger.info(message)
             else:

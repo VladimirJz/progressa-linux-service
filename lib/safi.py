@@ -100,18 +100,26 @@ class Session():
 
 
     def get(self,request):
+        
+        
+        
+        
         params=request.parameters
-        audit=[ 1, 1, date.today(), '127.0.0.1', 'api.rest', 1, 1]
-        params.extend(audit)
-        print (request.routine)
-        print (params)
-
-        with connections['core'].cursor() as cursor:       
-            cursor.callproc(request.routine,params)
-            raw_data = self.fetch_raw(cursor) 
+        routine=request.routine
+        #audit=[ 1, 1, date.today(), '127.0.0.1', 'api.rest', 1, 1]
+        #params.extend(audit)
+        #print (request.routine)
+        #print (params)
+        #result=self._execute_routine(ROUTINE,to_dict=True)
+        result=self._run(routine,params)
+        print(result)
+        # with connections['core'].cursor() as cursor:       
+        #     cursor.callproc(request.routine,params)
+        #     raw_data = self.fetch_raw(cursor) 
             
 
-        return raw_data
+        return result
+
 
         
     def fetch_raw(self, cursor):
@@ -158,7 +166,29 @@ class Session():
 
             r = requests.post(url = API_ENDPOINT, data = app_json,headers=self.REQUESTS_HEADER)
             print(r.status_code)
+    def _run(self,routine,params):
+        '''Devuelve un objeto Cursor'''
+        db=self.connect()
+        if(not db):
+            logger.error("MySQL: Lost connection whit ["+  self.db_name +  "] ")
+            exit()
+        #cursor=db.cursor()
+        try:
+            #cursor.callproc(routine,params)
+            with db.cursor() as cursor:  
+                cursor.callproc(routine,params)
+                print('tupoCursor:',cursor)
+        except mysql.connector.Error as err:
+            print(err)
+            message="MySQL: On Execute ["+ routine + "] >" +str(err)    
+            logger.error(message)
+            return None
+        else: 
+            message='MySQL:[' + routine  + '] executed sucessfully.'
+            logger.info(message)
+        return cursor.fetchall()
 
+    
     def _execute_routine(self,routine,to_dict=False):
             db=self.connect()
             if(not db):
@@ -283,10 +313,11 @@ class Request():
 
         
         def get_props(self,request, repository):
-            return [element for element in repository if element['request'] == request]
+            return [element for element in repository if element['keyword'] == request]
         
         def add(self,**kwargs):
             raw_parameters=[]
+            print(self.properties)
             unpack=self.properties[0]
             self._routine=unpack['routine']
             parameter_properties=unpack['parameters']
@@ -328,7 +359,12 @@ class Request():
             super().__init__(request)
             repository=Repository.Account
             self.properties=self.get_props(request,repository)
-            
+    
+    class Integracion(GenericRequest):
+        def __init__(self,request):
+            super().__init__(request)
+            repository=Repository.Integracion
+            self.properties=self.get_props(request,repository)
 
 # class CustomEncoder(json.JSONEncoder):
 #     def default(self, obj):
