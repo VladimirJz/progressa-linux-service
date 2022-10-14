@@ -7,7 +7,7 @@ import logging
 
 
 logger = logging.getLogger(f"main.{__name__}")
-logging.basicConfig(filename="jobs.log", level=logging.DEBUG,   format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',datefmt='%Y-%m-%d %H:%M:%S',)
+logging.basicConfig(filename="/opt/progressa/crontab/jobs.log", level=logging.DEBUG,   format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',datefmt='%Y-%m-%d %H:%M:%S',)
 formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s","%Y-%m-%d %H:%M:%S")
 config = configparser.ConfigParser()
 current_dir = path.dirname(path.realpath(__file__))
@@ -47,10 +47,10 @@ def main(**kwargs):
         print('data base is available')
         data=db.bulk_data(to_list=True)
         print(type(data))
-        file_name=safi.Utils.to_csv(data,**kwargs)
-        if(file_name):
+        file=safi.Utils.to_csv(data,**kwargs)
+        if(file):
             print('File generated')
-            if(safi.Utils.ftp_upload(file_name,**kwargs)):
+            if(safi.Utils.ftp_upload(file,**kwargs)):
                 message='FTP: Connection closed.'
                 logger.info(message)
             else:

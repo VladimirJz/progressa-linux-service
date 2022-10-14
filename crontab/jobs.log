@@ -20,3 +20,107 @@
 2022-09-22 12:20:45.278 INFO safi - ftp_upload: FTP:Open conection whit server
 2022-09-22 12:20:45.718 ERROR safi - ftp_upload: FTP:550 Permission denied.
 2022-09-22 12:20:45.718 ERROR daily - main: FTP: Failed to upload file
+2022-09-23 12:44:35.427 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 12:44:35.433 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 12:44:35.438 INFO safi - connect: MySQL: Database connection is open.
+2022-09-23 12:44:36.292 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-09-23 12:46:48.431 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 12:46:48.437 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 12:46:48.444 INFO safi - connect: MySQL: Database connection is open.
+2022-09-23 12:46:51.385 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-09-23 12:46:51.554 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-09-23 12:46:52.061 INFO safi - ftp_upload: FTP:Open conection whit server
+2022-09-23 12:46:52.497 ERROR safi - ftp_upload: FTP:550 Permission denied.
+2022-09-23 12:46:52.497 ERROR daily - main: FTP: Failed to upload file
+2022-09-23 13:06:26.569 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:06:26.576 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:06:26.583 INFO safi - connect: MySQL: Database connection is open.
+2022-09-23 13:06:29.435 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-09-23 13:06:29.603 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-09-23 13:06:30.269 ERROR safi - ftp_upload: FTP:550 Failed to change directory.
+2022-09-23 13:06:30.270 ERROR daily - main: FTP: Failed to upload file
+2022-09-23 13:07:13.529 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:07:13.537 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:07:13.544 INFO safi - connect: MySQL: Database connection is open.
+2022-09-23 13:07:16.990 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-09-23 13:07:17.159 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-09-23 13:07:17.801 ERROR safi - ftp_upload: FTP:530 Can't change to another user.
+2022-09-23 13:07:17.801 ERROR daily - main: FTP: Failed to upload file
+2022-09-23 13:07:55.244 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:07:55.256 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:07:55.264 INFO safi - connect: MySQL: Database connection is open.
+2022-09-23 13:07:58.250 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-09-23 13:07:58.412 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-09-23 13:07:59.213 ERROR safi - ftp_upload: FTP:550 Failed to change directory.
+2022-09-23 13:07:59.213 ERROR daily - main: FTP: Failed to upload file
+2022-09-23 13:08:19.345 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:08:19.352 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:08:19.359 INFO safi - connect: MySQL: Database connection is open.
+2022-09-23 13:08:22.479 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-09-23 13:08:22.795 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-09-23 13:08:23.457 INFO safi - ftp_upload: FTP:Open conection whit server
+2022-09-23 13:08:23.830 ERROR safi - ftp_upload: FTP:550 Permission denied.
+2022-09-23 13:08:23.831 ERROR daily - main: FTP: Failed to upload file
+2022-09-23 13:24:07.835 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:24:07.842 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:24:07.850 INFO safi - connect: MySQL: Database connection is open.
+2022-09-23 13:24:11.393 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-09-23 13:24:11.555 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-09-23 13:24:12.230 INFO safi - ftp_upload: FTP:Open conection whit server
+2022-09-23 13:24:12.625 ERROR safi - ftp_upload: FTP:550 Permission denied.
+2022-09-23 13:24:12.626 ERROR daily - main: FTP: Failed to upload file
+2022-09-23 13:42:01.690 ERROR daily - load_settings: 09/23/2022, 13:42:01-El archivo de configuración no Existe
+2022-09-23 13:49:39.955 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:49:39.963 INFO safi - _testConnection: MySQL: The database is available
+2022-09-23 13:49:39.971 INFO safi - connect: MySQL: Database connection is open.
+2022-09-23 13:49:43.245 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-09-23 13:49:43.401 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-09-23 13:49:44.074 INFO safi - ftp_upload: FTP:Open conection whit server
+2022-09-23 13:49:44.448 ERROR safi - ftp_upload: FTP:550 Permission denied.
+2022-09-23 13:49:44.449 ERROR daily - main: FTP: Failed to upload file
+2022-10-13 10:02:17.644 ERROR safi - _testConnection: 2003 (HY000): Can't connect to MySQL server on 'localhost:3308' (111)
+2022-10-13 10:02:17.645 ERROR safi - _testConnection: 2003 (HY000): Can't connect to MySQL server on 'localhost:3308' (111)
+2022-10-13 10:02:17.645 ERROR daily - main: MySQL: No database connection available
+2022-10-13 11:10:37.158 ERROR safi - _testConnection: 2003 (HY000): Can't connect to MySQL server on '10.90.100.70:3306' (111)
+2022-10-13 11:10:37.183 ERROR safi - _testConnection: 2003 (HY000): Can't connect to MySQL server on '10.90.100.70:3306' (111)
+2022-10-13 11:10:37.183 ERROR daily - main: MySQL: No database connection available
+2022-10-13 11:10:54.657 ERROR safi - _testConnection: 2003 (HY000): Can't connect to MySQL server on '10.90.100.70:3306' (111)
+2022-10-13 11:10:54.682 ERROR safi - _testConnection: 2003 (HY000): Can't connect to MySQL server on '10.90.100.70:3306' (111)
+2022-10-13 11:10:54.682 ERROR daily - main: MySQL: No database connection available
+2022-10-13 13:07:12.953 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 13:07:12.959 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 13:07:12.968 INFO safi - connect: MySQL: Database connection is open.
+2022-10-13 13:07:18.252 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-10-13 13:07:18.410 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-10-13 13:07:19.432 ERROR safi - ftp_upload: FTP:[Errno 113] No route to host
+2022-10-13 13:07:19.433 ERROR daily - main: FTP: Failed to upload file
+2022-10-13 13:19:57.308 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 13:19:57.316 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 13:19:57.322 INFO safi - connect: MySQL: Database connection is open.
+2022-10-13 13:20:00.735 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-10-13 13:20:00.898 INFO safi - to_csv: IO/OS: Bulk data on [saldos_dia.txt] file sucessfully.
+2022-10-13 13:20:03.946 ERROR safi - ftp_upload: FTP:[Errno 113] No route to host
+2022-10-13 13:20:03.946 ERROR daily - main: FTP: Failed to upload file
+2022-10-13 14:13:14.543 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:13:14.550 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:13:14.557 INFO safi - connect: MySQL: Database connection is open.
+2022-10-13 14:13:17.556 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-10-13 14:13:40.626 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:13:40.633 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:13:40.639 INFO safi - connect: MySQL: Database connection is open.
+2022-10-13 14:13:44.574 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-10-13 14:15:21.788 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:15:21.795 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:15:21.802 INFO safi - connect: MySQL: Database connection is open.
+2022-10-13 14:15:24.692 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-10-13 14:17:04.093 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:17:04.099 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:17:04.105 INFO safi - connect: MySQL: Database connection is open.
+2022-10-13 14:17:07.038 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-10-13 14:23:27.221 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:23:27.226 INFO safi - _testConnection: MySQL: The database is available
+2022-10-13 14:23:27.236 INFO safi - connect: MySQL: Database connection is open.
+2022-10-13 14:23:30.508 INFO safi - _execute_routine: MySQL:[call PGS_MAESTROSALDOS('G','',0,'N') ] executed sucessfully.
+2022-10-13 14:23:30.674 INFO safi - to_csv: IO/OS: Bulk data on [/opt/progressa/files/reporte_10132022.txt] file sucessfully.
+2022-10-13 14:23:33.705 ERROR safi - ftp_upload: FTP:[Errno 113] No route to host
+2022-10-13 14:23:33.705 ERROR daily - main: FTP: Failed to upload file

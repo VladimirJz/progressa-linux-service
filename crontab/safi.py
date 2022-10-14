@@ -1,5 +1,6 @@
 from distutils.log import debug
 from email import message
+from multiprocessing import set_forkserver_preload
 from sqlite3 import DatabaseError
 from sre_constants import SUCCESS
 import mysql.connector
@@ -241,15 +242,23 @@ class CustomEncoder(json.JSONEncoder):
         # 👇️ otherwise use the default behavior
         return json.JSONEncoder.default(self, obj)
 
+
+
 class Utils:
+
+            
     def to_csv(data,**kwargs):
         
         current_date=datetime.now().strftime("%m%d%Y")
         file_extension=kwargs.pop('fileformat')
         field_separator=kwargs.pop('fieldseparator')
         file_name=kwargs.pop('filename') + '_'+ current_date + '.' +file_extension
-        file_dir=kwargs.pop('directory')
-        full_filename=file_dir + '/' + file_name 
+        file_dir=kwargs.pop('directory') + '/'
+        full_filename=file_dir + file_name 
+        #file_dir=kwargs.pop('directory')
+        print(file_dir)
+        file=Generic.File(file_name,file_dir)
+        
 
         with open(full_filename, 'w') as f:  
             writer = csv.writer(f, delimiter =field_separator)          
@@ -263,7 +272,7 @@ class Utils:
             logger.info(message)
 
             
-        return full_filename
+        return file
 
 
     def get_filename(**kwargs):
@@ -297,18 +306,56 @@ class Utils:
             logger.info(message)
         ftp.encoding = "utf-8"
         ftp_message=''
-        
+        print ('full' + file.full_name)
+        print(file.name)
+
+        print(file.path)        
         try:
-            with open(file, "rb") as f:
+            with open(file.full_name, "rb") as f:
                 # use FTP's STOR command to upload the file
-                message= 'FTP:' +  ftp.storbinary(f"STOR {file}", f)
-                logger.Info(message)
+                print(ftp.cwd(ftp_dir))
+                print(ftp.nlst())
+                print (file)
+                message= 'FTP:' +  ftp.storbinary(f"STOR {file.name}", f)
+                #f.storbinary('STOR ' + file.name,f)
+                print((message))
+                logger.info(message)
+
         except ftplib.all_errors as e:
             message='FTP:' + str(e) + ''
             logger.error(message)
             return False
         else:
             message='FTP: File upload successfully'
-            logger.Info(message)
+            logger.info(message)
             return True
         pass
+
+# Custom Generics
+class Generic():
+    class File():
+        @property
+        def name(self):
+            return self._name
+        @name.setter
+        def name(self,value):
+            self._name=value
+
+        @property
+        def path(self):
+            return self._path
+        @path.setter
+        def path(self,value):
+            self._path=value
+        
+        @property
+        def full_name(self):
+            return self._full_name
+        @full_name.setter
+        def full_name(self,value):
+            self._full_name=value
+
+        def __init__(self,file_name,file_path):
+            self.name=file_name
+            self.path=file_path
+            self.full_name=file_path + file_name
