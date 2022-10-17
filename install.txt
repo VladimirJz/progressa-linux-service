@@ -1,0 +1,22 @@
+# requerimientos
+sudo apt install python3.8-venv
+
+# 
+#Default folder:
+/opt/progressa/
+/opt/progressa/crontab/
+
+
+# Tareas programadasd (crontab)
+El archivo daily.py realiza la generación del archivo de saldos diarios de cartera.
+Su ejecución se programa directamente en el crontab
+
+
+
+Para instalar el servicio:
+
+sudo cp etc/systemd/system/pgss-monitor.service /etc/systemd/system/
+
+ -- Iniciar el servicio
+
+ sudo cp -R db/ lib/ run.py service.py /opt/progressa/

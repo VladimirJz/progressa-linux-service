@@ -35,6 +35,10 @@ class service_stats():
 
 
 class Session():
+    '''
+    Gestiona la conexión con la base de datos 
+    asi como la interacción con la misma
+    '''
     REQUESTS_HEADER = {'Content-type': 'application/json'}
     service=service_stats()
     
@@ -99,25 +103,32 @@ class Session():
 
 
 
-    def get(self,request):
+    def get(self,request,format='dict'):
+        '''
+        Obtiene de la base de datos la petición 'Safi.Request' y la devuelve en  el formato requerido
+        '''
         
-        
-        
+        def only_data(resultset):
+            '''
+            Devuelve el resultset en formato de lista sin encabezados.
+            '''
+            data_no_headers=[]
+            for row in resultset:
+                data_no_headers.append( [i for i in row.values()])
+            return data_no_headers
+            pass
         
         params=request.parameters
         routine=request.routine
-        #audit=[ 1, 1, date.today(), '127.0.0.1', 'api.rest', 1, 1]
-        #params.extend(audit)
-        #print (request.routine)
-        #print (params)
-        #result=self._execute_routine(ROUTINE,to_dict=True)
         resultset=self._run(routine,params)
+        print(type(resultset))
+
+        if format=='dict':
+            pass
+        if format=='onlydata':
+            return only_data(resultset)
+            pass
         raw_data = self.fetch_raw(resultset) 
-        print(resultset)
-        # with connections['core'].cursor() as cursor:       
-        #     cursor.callproc(request.routine,params)
-        #     raw_data = self.fetch_raw(cursor) 
-            
 
         return raw_data
 
@@ -126,6 +137,7 @@ class Session():
     def fetch_raw(self, cursor):
         columns = [col[0] for col in cursor.description]
         print (cursor.rowcount)
+        print (columns)
         if cursor.rowcount>1:
             results=[]
         else:
@@ -139,10 +151,15 @@ class Session():
 
 
                 results=dict(zip(columns, row))
+            print(row)
+            print(results)
         return results
 
     
     def is_connected(self):
+        '''
+        Devuelve el ultimo estatus de la conexión.
+        '''
         if self.connect():
             return True
         else:
@@ -271,6 +288,9 @@ class Session():
 
 
     def connect(self):
+        '''
+        Devuelve un objeto de  conexión con la Base de datos
+        '''
         success_connection=False
         try:
             db_connection=mysql.connector.connect(**self.db_strcon)
@@ -310,21 +330,27 @@ class Request():
      
       
     class GenericRequest():
+        '''
+        Permite instanciar las peticiones a la BD como instancias de clase SAFI.Request en lugar de 
+        usar directamente las rutinas de BD.
+        '''
         def __init__(self,request):
             #print(repo)
             self._properties=''
             self._parameters=[]
             self._routine=''
-            
-        def run(self):
-            return {'output':'json'}
-            pass
-
         
         def get_props(self,request, repository):
+            '''
+            Obtiene las propiedades de ejecucución del 'SAFI.Request' solicitado.
+            '''
             return [element for element in repository if element['keyword'] == request]
         
         def add(self,**kwargs):
+            '''
+            Agrega parametros al 'SAFI.Request' e inicializa con los valores default
+            aquellos que no son proporcionados explicitamente.
+            '''
             raw_parameters=[]
             print(self.properties)
             unpack=self.properties[0]
@@ -389,9 +415,10 @@ class Request():
 
 
 
-#######################################
-## Utilities for handle SAFI stuffs
-#######################################
+#---------------------------------------------------------------------------
+# Utilerias
+#---------------------------------------------------------------------------
+
 
 class Utils:
     class CustomJsonEncoder(json.JSONEncoder):
@@ -411,7 +438,7 @@ class Utils:
         field_separator=
         file_name=
         '''
-        current_date=datetime.now().strftime("%m%d%Y")
+        current_date=datetime.now().strftime("%Y-%m-%d")
         file_extension=kwargs.pop('fileformat')
         field_separator=kwargs.pop('fieldseparator')
         file_name=kwargs.pop('filename') + '_'+ current_date + '.' +file_extension
@@ -493,10 +520,10 @@ class Utils:
             return True
         pass
 
-################################################
-# Custom Generics
-# 
-################################################
+#---------------------------------------------------------------------------
+# Objetos genericos
+#---------------------------------------------------------------------------
+
 class Generic():
     class File():
         @property
@@ -524,3 +551,5 @@ class Generic():
             self.name=file_name
             self.path=file_path
             self.full_name=file_path + file_name
+
+

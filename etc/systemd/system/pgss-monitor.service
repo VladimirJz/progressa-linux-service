@@ -4,7 +4,7 @@
 
 [Unit]
 
-Description=Progressa Monitor service
+Description= Progressa - Servicio de actualizacion de Saldos
 
 # Send an email if the service ever fails
 #OnFailure=status-email@%n.service
@@ -15,19 +15,19 @@ Description=Progressa Monitor service
 
 [Service]
 
-# User to run the service as
+# = Para definir un usuario especifico
 #User=tal
-
-# Group to run the service as
+# = Grupo
 #Group=tal
+
 
 # Type of service
 Type=simple
 
-# Main task
+# Proceso base
 ExecStart=/opt/progressa/.env/bin/python3 /opt/progressa/service.py
 
-# Required to see Python output in logs
+# Considerar la salida de python
 Environment="PYTHONUNBUFFERED=x"
 
 # Uncomment this to see debug messages

@@ -35,4 +35,3 @@ def main(**kwargs):
     #     logger.info("Running our code")
     #     logger.info("Conectando a " + safi.db_name)
 
-

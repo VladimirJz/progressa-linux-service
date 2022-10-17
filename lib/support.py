@@ -1,6 +1,20 @@
+import sys
 import logging
+import configparser
+from datetime import datetime
+from  os import path
 
+
+
+
+#---------------------------------------------------------------------------
+# Congiguración de log
+#---------------------------------------------------------------------------
 logger = logging.getLogger(f"main.{__name__}")
+log_output_format='%(asctime)s.%(msecs)03d [%(levelname)s] %(module)s - (%(funcName)s): %(message)s'
+logging.basicConfig(filename="service.log", level=logging.DEBUG,   format=log_output_format,datefmt='%Y-%m-%d %H:%M:%S')
+
+
 
 def send_alert(tback, destination_addresses):
     """
@@ -47,3 +61,25 @@ def format_exc_for_journald(ex, indent_lines=False):
         else:
             result += "." + line + "\n"
     return result.rstrip()
+
+
+## ARchivo de configuración
+# TODO:debe recibir como parametro  las secciones a cargar.
+
+def load_settings():
+    config = configparser.ConfigParser()
+    current_dir = path.dirname(path.realpath(__file__))
+    parent_dir=path.dirname(current_dir)
+    print (parent_dir)
+    config_file=current_dir + '/' +'pgss.cfg'
+    config_file=parent_dir + '/' +'pgss.cfg'
+    if(not path.exists(config_file)):      
+        logger.error('pgss.cfg: El archivo de configuración no Existe')
+        sys.exit()
+    config.read(config_file)
+    settings=dict(config.items('DATABASE'))
+    settings.update(dict(config.items('FTP')))
+    settings.update(dict(config.items('SALDOSDIARIOS')))
+    print(settings)
+
+    return settings
