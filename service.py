@@ -11,6 +11,17 @@ from lib.support import send_alert, format_exc_for_journald
 
 import configparser
 
+
+
+#---------------------------------------------------------------------------
+# Congiguración de log
+#---------------------------------------------------------------------------
+logger = logging.getLogger(f"main.{__name__}")
+log_output_format='%(asctime)s.%(msecs)03d [%(levelname)s] %(module)s - (%(funcName)s): %(message)s'
+logging.basicConfig(filename="/opt/progressa/service.log", level=logging.DEBUG,   format=log_output_format,datefmt='%Y-%m-%d %H:%M:%S')
+
+
+
 ####################
 # Global Variables #
 ####################
@@ -178,7 +189,8 @@ while True:
 
     try:
  
-
+        print ("here")
+        logger.info("Antes de main")
         main()
 
     except Exception:

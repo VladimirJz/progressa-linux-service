@@ -9,7 +9,7 @@ import sqlite3
 import json
 import requests
 from decimal import *
-from datetime import datetime
+from datetime import datetime,date
 from sys import exit
 import csv
 from os import path
@@ -98,16 +98,24 @@ class Session():
         self.db_host=kwargs.pop('dbhost')
         self.db_port=kwargs.pop('dbport')
         self.db_strcon=self._set_strconx()
-        print('_init_'+ str(self._testConnection()))
+        #print('_init_'+ str(self._testConnection()))
         self._is_available=self._testConnection()
 
 
 
-    def get(self,request,format='dict'):
+    def get(self,request,format='raw'):
         '''
         Obtiene de la base de datos la petición 'Safi.Request' y la devuelve en  el formato requerido
+        Por default devuelve un objeto cursor.
         '''
-        
+        def json_str(resulset):
+            data_json=[]
+            for row in resulset:
+                json_str = json.dumps(row,cls=Generic.CustomJsonEncoder)
+                data_json.append(json_str)
+            
+            return data_json
+
         def only_data(resultset):
             '''
             Devuelve el resultset en formato de lista sin encabezados.
@@ -121,10 +129,11 @@ class Session():
         params=request.parameters
         routine=request.routine
         resultset=self._run(routine,params)
-        print(type(resultset))
-
-        if format=='dict':
-            pass
+        #print(type(resultset))
+        if format=='json':
+            return json_str(resultset)
+        if format=='raw':
+            return  resultset
         if format=='onlydata':
             return only_data(resultset)
             pass
@@ -136,8 +145,8 @@ class Session():
         
     def fetch_raw(self, cursor):
         columns = [col[0] for col in cursor.description]
-        print (cursor.rowcount)
-        print (columns)
+        #print (cursor.rowcount)
+        #print (columns)
         if cursor.rowcount>1:
             results=[]
         else:
@@ -151,8 +160,8 @@ class Session():
 
 
                 results=dict(zip(columns, row))
-            print(row)
-            print(results)
+            #print(row)
+            #print(results)
         return results
 
     
@@ -180,10 +189,12 @@ class Session():
         result=cursor.fetchall()
         for row in result:
             app_json = json.dumps(row,cls=Utils.CustomJsonEncoder)
-            print(app_json)
+            #print(app_json)
 
             r = requests.post(url = API_ENDPOINT, data = app_json,headers=self.REQUESTS_HEADER)
-            print(r.status_code)
+            #print(r.status_code)
+
+
     def _run(self,routine,params):
         '''Devuelve un objeto Cursor'''
         db=self.connect()
@@ -191,8 +202,8 @@ class Session():
             logger.error("MySQL: Lost connection whit ["+  self.db_name +  "] ")
             exit()
         #cursor=db.cursor()
-        print(routine)
-        print(params)
+        #print(routine)
+        #print(params)
         try:
             #cursor.callproc(routine,params)
             with db.cursor(dictionary=True) as cursor:  
@@ -226,7 +237,7 @@ class Session():
                 #db.commit()
 
             except mysql.connector.Error as err:
-                print(err)
+                #print(err)
                 message="MySQL: On Execute ["+ routine + "] >" +str(err)
         
                 logger.error(message)
@@ -262,13 +273,13 @@ class Session():
    
     def _testConnection(self):
         success_connection=False
-        print('init:' + str(success_connection))
+        #print('init:' + str(success_connection))
         try:
             db_connection=mysql.connector.connect(**self.db_strcon)
             message="MySQL: The database is available"
-            print(message)
+            #print(message)
             success_connection= True
-            print('try')
+            #print('try')
 
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -317,14 +328,14 @@ class Session():
                                     host=self.db_host,
                                     database=self.db_name,
                                     port=self.db_port)
-        print (str_cnx)
+        #print (str_cnx)
         return str_cnx
 
 
 class Request():
     def __init__(self,user,Engine):
         #repo=Repository()
-        print(type(self))
+        #print(type(self))
         self._audit=[ 1, 1, datetime.now(), '127.0.0.1', 'api.rest', 1, 1]
         pass
      
@@ -352,7 +363,7 @@ class Request():
             aquellos que no son proporcionados explicitamente.
             '''
             raw_parameters=[]
-            print(self.properties)
+            #print(self.properties)
             unpack=self.properties[0]
             self._routine=unpack['routine']
             parameter_properties=unpack['parameters']
@@ -421,16 +432,18 @@ class Request():
 
 
 class Utils:
-    class CustomJsonEncoder(json.JSONEncoder):
-        def default(self, obj):
-            # if passed in object is instance of Decimal
-            # convert it to a string
-            if isinstance(obj, Decimal):
-                return str(obj)
-            if isinstance(obj, datetime):
-                return str(obj)
-            #otherwise use the default behavior
-            return json.JSONEncoder.default(self, obj)
+    def post(data,**kwargs):
+        REQUESTS_HEADER = {'Content-type': 'application/json'}
+        api_endpoint=kwargs.pop('apiupdateendpoint')
+        message='API: POST:' + api_endpoint
+        logger.info(api_endpoint)
+        print(api_endpoint)
+        for row in data:
+            print (row)
+            print(type(row))
+            r = requests.post(url = api_endpoint, data = row,headers=REQUESTS_HEADER)
+            print (r)
+        pass
                 
     def to_csv(data,**kwargs):
         '''
@@ -525,6 +538,21 @@ class Utils:
 #---------------------------------------------------------------------------
 
 class Generic():
+    
+    class CustomJsonEncoder(json.JSONEncoder):
+        def default(self, obj):
+            # if passed in object is instance of Decimal
+            # convert it to a string
+            if isinstance(obj, Decimal):
+                return str(obj)
+            if isinstance(obj, datetime):
+                return str(obj)
+            if isinstance(obj, date):
+                return str(obj)
+   
+            #otherwise use the default behavior
+            return json.JSONEncoder.default(self, obj)
+    
     class File():
         @property
         def name(self):

@@ -22,10 +22,14 @@ def main():
     db=safi.Session(**settings)
 
     if db.is_available :
-        saldos_actualizados=safi.Request.Integracion('saldos_diarios').add()
-        data=db.get(saldos_actualizados,format='onlydata')
+        saldos_actualizados=safi.Request.Integracion('saldos_actualizados').add(UltimaTransaccion=1)
+        
+        data=db.get(saldos_actualizados,format='json')
         #file=safi.Utils.to_csv(data,**kwargs)
-        print(data)
+        safi.Utils.post(data,**settings)
+
+        #print(data)
+        #print('done..')
 
 #-------------------------------------------------------------------------
 #  RUN !

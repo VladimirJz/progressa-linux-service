@@ -71,15 +71,18 @@ def load_settings():
     current_dir = path.dirname(path.realpath(__file__))
     parent_dir=path.dirname(current_dir)
     print (parent_dir)
+    print (current_dir)
     config_file=current_dir + '/' +'pgss.cfg'
     config_file=parent_dir + '/' +'pgss.cfg'
     if(not path.exists(config_file)):      
-        logger.error('pgss.cfg: El archivo de configuración no Existe')
+        logger.error('pgss.cfg: El archivo de configuración no existe ' + config_file + '.')
         sys.exit()
     config.read(config_file)
     settings=dict(config.items('DATABASE'))
     settings.update(dict(config.items('FTP')))
     settings.update(dict(config.items('SALDOSDIARIOS')))
+    settings.update(dict(config.items('WEBSERVICES')))
+
     print(settings)
 
     return settings
