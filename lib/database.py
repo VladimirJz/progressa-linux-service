@@ -1,6 +1,6 @@
 class Repository():
     Integracion=[
-       {'routine':'PGS_MAESTROSALDOS',
+       {'routine':'PGSSALDOSREP',
         'keyword':'saldos_diarios',
         'output':'table',
        'parameters':
@@ -32,7 +32,7 @@ class Repository():
 
                     ]
        },
-       {'routine':'PGS_MAESTROSALDOS',
+       {'routine':'PGSSALDOSREP',
         'keyword':'saldos_actualizados',
         'output':'table',
        'parameters':
@@ -49,16 +49,16 @@ class Repository():
                      'required':False 
                     },
                     {'order':'3',
-                     'name':'UltimaTransaccion',#OrigenID
+                     'name':'Transaccion',#OrigenID
                      'type':'int',
                       'default':0,
                      'required':True
                     },
                                         
                     {'order':'4',
-                     'name':'S',# Option
+                     'name':'Consolidado',# Option
                      'type':str,
-                     'default':'N', 
+                     'default':'S', 
                      'required':False 
                     },
 
@@ -67,5 +67,3 @@ class Repository():
     ]
     
 
-
-    #"call PGS_MAESTROSALDOS('I','T',556,'S') ") 

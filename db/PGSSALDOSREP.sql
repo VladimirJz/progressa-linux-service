@@ -1,4 +1,4 @@
-CREATE DEFINER=`root`@`localhost` PROCEDURE `PGS_MAESTROSALDOS`(
+CREATE DEFINER=`root`@`localhost` PROCEDURE `PGSSALDOSREP`(
 Par_Tipo CHAR,
 Par_Instrumento CHAR,
 Par_OrigenID BIGINT,
@@ -16,6 +16,9 @@ TerminaStore: BEGIN
     DECLARE Instrumento_Cliente char;
     DECLARE Instrumento_Credito char;
     DECLARE Instrumento_Transaccion char;
+
+	DECLARE Var_TransaccionInicio int;
+	DECLARE Var_TransaccionFin int;
 	
 
 	--  SQL
@@ -64,10 +67,16 @@ TerminaStore: BEGIN
 					INSERT INTO lista_creditos
 						SELECT CreditoID FROM CREDITOS where Estatus NOT IN ('P','K','C') and CreditoID=Par_OrigenID;
                 END;
-            ELSE   
+            ELSE    -- Por Numero de Transacción
 				BEGIN
+					IF (Par_OrigenID = Entero_Cero)THEN
+						SET Var_TransaccionInicio=(select coalesce(Valor,Entero_Cero) from microfin.PGSSERVICIOKEY where ServicioID=1  and KeyID=1);
+						SET Var_TransaccionFin=(select Transaccion from CREDITOSMOVS order by CreditosMovsID desc limit 1 );
+
+					ENDIF;
+					
 					INSERT INTO lista_creditos
-						SELECT distinct CreditoID from CREDITOSMOVS where /*FechaOperacion=Var_FechaSistema and */ Transaccion>=Par_OrigenID;
+						SELECT distinct CreditoID from CREDITOSMOVS where FechaOperacion=Var_FechaSistema and Transaccion>Var_TransaccionInicio and Transaccion>Var_TransaccionFin;
                 END;
             END CASE;
         END;
@@ -312,13 +321,6 @@ insert into saldo_vencido_banda
 
 DROP TABLE IF EXISTS saldo_dias_vencido;
 
--- SET CREATE_TABLE ="CREATE  TEMPORARY TABLE  saldo_dias_vencido"	;				
--- SET SELECT_FIELDS=" SELECT CreditoID, ";
--- SET  FROM_TABLES =" FROM saldo_vencido_banda;";
--- SET CASE_FIELDS=( SELECT  
--- 							GROUP_CONCAT( 
--- 							concat(" (CASE WHEN banda_id=",banda_id," THEN SaldoCapital ELSE 0 END) AS  " ,cabecera) )
--- 							from bandas_vencido);
 
 						
 SET CREATE_TABLE ="CREATE  TEMPORARY TABLE  saldo_dias_vencido"	;				
@@ -334,11 +336,6 @@ PREPARE QUERY FROM @SQL_QUERY;
 EXECUTE QUERY;
 DEALLOCATE PREPARE QUERY;
 
-
-
-
-				
--- select CreditoID,  from generales_credito gc inner join saldo_dias_vencido sv on gc.CreditoID=sv.CreditoID 					left join credito_incumplimiento ci on gc.CreditoID=ci.CreditoID;
 
 
 
@@ -417,19 +414,6 @@ DEALLOCATE PREPARE QUERY;
 
 
 
--- select * from   saldo_pago_mes spm  right join  generales_credito gc  on spm.CreditoID=gc.CreditoID  inner join saldo_dias_vencido sv on gc.CreditoID=sv.CreditoID 	 left join credito_incumplimiento ci on gc.CreditoID=ci.CreditoID;
-/*
-select '' as FOLIOUPD, 'SAFI' as SIORIREQ, 'SAFI' USRORIREQ , now() as FEHODATOS,'' IDELEMENTO,'' IDELEPSSA, '' NIVELACU,''SEGMENTO,
-ORIPDTO,IDPDTO,'' NEGOCIO,'' CUENTA,'' SERIE,'' TDACTBDS,''TIPOCTABDS , ''GPOTASA,PLAZOMAX,IDPROGSSA,CTAPROGSSA,SERIEPGSSA,TDASUCPGSA,
-TPOCTAPGSA,'' STCUENTA,LIMITE,'' PORLIMDISP,0 CAPPAGO,0 CAPPADIS,0 CAPPAPF,0 CAPPAPFUS,MONTODIS,SDOCTA,
-VDO,VDO30,VDO60,VDO90,VDOM90,0 IFIN,0 IMOR,0 as DIASVDO, PAGOMES00,PAGOMES01,PAGOMES02,PAGOMES03,PAGOMES04,PAGOMES05,PAGOMES06,
-PAGOMES07,PAGOMES08,PAGOMES09,PAGOMES10,PAGOMES11,PAGOMES12,0 NRTX,'' IDPERIODO,0 VALFIN1,0 VALFIN2,0 VALFIN3,0 VALFIN4,0 VALFIN5,
-0 VALREF1, 0 VALREF2,0 VALREF3, 0 VALREF4, 0 VALREF5,''MATCHIDELE, c.RFC,c.CURP 
-from 
-saldo_pago_mes spm  right join  (generales_credito gc inner join generales_cliente c on gc.ClienteID=c.ClienteID)  on spm.CreditoID=gc.CreditoID  inner join saldo_dias_vencido sv on gc.CreditoID=sv.CreditoID 	 
-left join credito_incumplimiento ci on gc.CreditoID=ci.CreditoID;
-
-*/
 
 IF(Par_Tipo=Reporte_Global)THEN
 	BEGIN
@@ -477,6 +461,8 @@ ELSE
 		left join credito_incumplimiento ci on gc.CreditoID=ci.CreditoID
         limit 60;
 		
+        UPDATE microfin.PGSSERVICIOKEY SET Valor=Var_TransaccionFin  where ServicioID=1  and KeyID=1;
+
 	END;
 END IF;
 

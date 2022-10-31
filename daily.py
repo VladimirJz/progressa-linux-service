@@ -10,30 +10,22 @@ import logging
 logger = logging.getLogger(f"main.{__name__}")
 log_output_format='%(asctime)s.%(msecs)03d [%(levelname)s] %(module)s - (%(funcName)s): %(message)s'
 logging.basicConfig(filename="crontab/jobs.log", level=logging.DEBUG,   format=log_output_format,datefmt='%Y-%m-%d %H:%M:%S')
-# formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s","%Y-%m-%d %H:%M:%S")
-
-#
-
-# logger = logging.getLogger(f"main.{__name__}")
-# logging.basicConfig(filename="/opt/progressa/crontab/jobs.log", level=logging.DEBUG,   format='%(asctime)s.%(msecs)03d %(levelname)s %(module)s - %(funcName)s: %(message)s',datefmt='%Y-%m-%d %H:%M:%S',)
-# formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s","%Y-%m-%d %H:%M:%S")
-
 
 #---------------------------------------------------------------------------
 # Nota: Toda la funcionalidad debe estar contenida en main
 #---------------------------------------------------------------------------
 
-def main(**kwargs):
+def main():
 
-
-    db=safi.Session(**kwargs)
+    settings=support.load_settings()        
+    db=safi.Session(**settings)
 
     if db.is_available :
         saldos_globales=safi.Request.Integracion('saldos_diarios').add()
         data=db.get(saldos_globales,format='onlydata')
-        file=safi.Utils.to_csv(data,**kwargs)
+        file=safi.Utils.to_csv(data,**settings)
         if(file):
-            if(safi.Utils.ftp_upload(file,**kwargs)):
+            if(safi.Utils.ftp_upload(file,**settings)):
                 message='FTP: Connection closed.'
                 logger.info(message)
             else:
@@ -48,13 +40,13 @@ def main(**kwargs):
         logger.error(message)
 
 
-#---------------------------------------------------------------------------
-# 
 #-------------------------------------------------------------------------
-settings=support.load_settings()        
-main(**settings)
+# Run !
+#-------------------------------------------------------------------------
+   
+main()
 
-
+# -------------------------------------------------------------------------
 
 
 

@@ -14,13 +14,19 @@ from sys import exit
 import csv
 from os import path
 import  ftplib
-
-
-
 import logging
 
+
+#---------------------------------------------------------------------------
+# Congiguración de log
+#---------------------------------------------------------------------------
 logger = logging.getLogger(f"main.{__name__}")
+log_output_format='%(asctime)s.%(msecs)03d [%(levelname)s] %(module)s - (%(funcName)s): %(message)s'
+logging.basicConfig(filename="/opt/progressa/service.log", level=logging.DEBUG,   format=log_output_format,datefmt='%Y-%m-%d %H:%M:%S')
+
+#logger = logging.getLogger(f"main.{__name__}")
 #logging.basicConfig(filename="log.txt", level=logging.DEBUG)
+
 LAST_TRASACCTION_ID="SELECT savings_transaccion_id from SAFI"
 CLIENTS_LIST="select Distinct ClienteID from CUENTASAHOMOV cm inner join CUENTASAHO c on c.CuentaAhoID=cm.CuentaAhoID   where cm.NumTransaccion>70000"
 DB_FILE='/opt/progressa/data.db'
@@ -129,15 +135,20 @@ class Session():
         params=request.parameters
         routine=request.routine
         resultset=self._run(routine,params)
-        #print(type(resultset))
-        if format=='json':
-            return json_str(resultset)
-        if format=='raw':
-            return  resultset
-        if format=='onlydata':
-            return only_data(resultset)
-            pass
-        raw_data = self.fetch_raw(resultset) 
+        if resultset:
+            #print(type(resultset))
+            if format=='json':
+                return json_str(resultset)
+            if format=='raw':
+                return  resultset
+            if format=='onlydata':
+                return only_data(resultset)
+                pass
+            raw_data = self.fetch_raw(resultset) 
+        else:
+            message='API: No Rows to return. '  
+            logger.info(message)
+            return None
 
         return raw_data
 
@@ -187,12 +198,13 @@ class Session():
         cursor=db.cursor(dictionary=True)
         cursor.execute("call PGS_MAESTROSALDOS('I','T',556,'S') ") 
         result=cursor.fetchall()
-        for row in result:
-            app_json = json.dumps(row,cls=Utils.CustomJsonEncoder)
-            #print(app_json)
+        if(result):
+            for row in result:
+                app_json = json.dumps(row,cls=Utils.CustomJsonEncoder)
+                #print(app_json)
 
-            r = requests.post(url = API_ENDPOINT, data = app_json,headers=self.REQUESTS_HEADER)
-            #print(r.status_code)
+                r = requests.post(url = API_ENDPOINT, data = app_json,headers=self.REQUESTS_HEADER)
+                #print(r.status_code)
 
 
     def _run(self,routine,params):
@@ -204,16 +216,20 @@ class Session():
         #cursor=db.cursor()
         #print(routine)
         #print(params)
+        has_rows=False
         try:
             #cursor.callproc(routine,params)
             with db.cursor(dictionary=True) as cursor:  
                 cursor.callproc(routine,params)
                 for result in cursor.stored_results():
+                    has_rows =True
                     pass
+                
                 #    r
             
                 #print(rows)
                 #print('tupoCursor:',rows)
+ 
         except mysql.connector.Error as err:
             print(err)
             message="MySQL: On Execute ["+ routine + "] >" +str(err)    
@@ -222,7 +238,15 @@ class Session():
         else: 
             message='MySQL:[' + routine  + '] executed sucessfully.'
             logger.info(message)
-        return result
+        db.commit()
+        db.close()
+        if has_rows:
+
+            return result
+        else:
+            message="MySQL: Return a empty resultset. ["+ routine + "]."    
+            logger.info(message)
+            return None
 
 
     
@@ -412,18 +436,6 @@ class Request():
             repository=Repository.Integracion
             self.properties=self.get_props(request,repository)
 
-# class CustomEncoder(json.JSONEncoder):
-#     def default(self, obj):
-#         # Se convierten objetos no manejables a sting
-#         if isinstance(obj, Decimal):
-#             return str(obj)
-#         if isinstance(obj, datetime):
-#             return str(obj)
-#         return json.JSONEncoder.default(self, obj)
-
-
-
-
 
 
 #---------------------------------------------------------------------------
@@ -436,14 +448,23 @@ class Utils:
         REQUESTS_HEADER = {'Content-type': 'application/json'}
         api_endpoint=kwargs.pop('apiupdateendpoint')
         message='API: POST:' + api_endpoint
-        logger.info(api_endpoint)
+        logger.info(message)
         print(api_endpoint)
+        print(len(data))
+        success=0
         for row in data:
             print (row)
-            print(type(row))
+            #print(type(row))
             r = requests.post(url = api_endpoint, data = row,headers=REQUESTS_HEADER)
-            print (r)
-        pass
+            if(str(r)=='200'):
+                success+=1
+            message='API: Server return :' + str(r)
+            logger.info(message)
+
+        
+        message='API: send : ' + str(success) + ' Rows Successfully.'
+        logger.info(message)
+
                 
     def to_csv(data,**kwargs):
         '''

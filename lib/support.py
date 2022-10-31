@@ -3,7 +3,7 @@ import logging
 import configparser
 from datetime import datetime
 from  os import path
-
+import smtplib, ssl
 
 
 
@@ -18,13 +18,12 @@ logging.basicConfig(filename="service.log", level=logging.DEBUG,   format=log_ou
 
 def send_alert(tback, destination_addresses):
     """
-        Generates the subject, body, and email destination for the email
-        alert we are about to send
+        Genera la alerta para notificar una excepción no controlada en el servicio.
     """
 
     subject = "Service Exception Raised"
 
-    body = "Our service ran into an issue. This is the traceback:\n\n"
+    body = "El servicio PGSS-MONITOR generó una excepción:\n [Traceback:]\n\n"
     body += tback
 
     # Send the actual email
@@ -35,16 +34,26 @@ def send_mail(subject, body, to):
         Send the email
     """
 
-    # Note: We already printed the exception to the terminal, so this
-    # function does NOT need to print the exception again. It just needs to
-    # send it. This is just sample code. The real code would send the alert
-    # quietly (not print anything to terminal, except maybe a message that
-    # an alert was sent)
 
     logger.warning("="*80)
     logger.warning(f"Sending email to '{to}' with subject '{subject}' about an exception being raised with body:")
     logger.warning(body)
     logger.warning("="*80)
+    port = 587  # For SSL
+    smtp_server = "smtp-mail.outlook.com"
+    sender_email = "vladimir.jz@hotmail.com"  # Enter your address
+    receiver_email = "vjimenezv@ieepo.gob.mx"  # Enter receiver address
+    password = "Vostro1310"
+    message = """\
+    Subject: Hi there
+
+    This message is sent from Python."""
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
+
 
 def format_exc_for_journald(ex, indent_lines=False):
     """
