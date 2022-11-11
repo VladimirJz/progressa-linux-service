@@ -132,29 +132,52 @@ class Session():
             return data_no_headers
             pass
         
+        def fetch_raw(resultset):
+            '''
+            Devuelve el resultset en formato de lista sin encabezados.
+            '''
+            print("raw");
+            results=[]
+            print(type(resultset))
+            for a in resultset:
+                print(type(a))
+                print(a)
+                results.append(a)
+            return results
+
         params=request.parameters
         routine=request.routine
         resultset=self._run(routine,params)
+        print("AQUI")
         if resultset:
+                
             #print(type(resultset))
             if format=='json':
+                print("JS")
                 return json_str(resultset)
             if format=='raw':
-                return  resultset
+                return  fetch_raw(resultset)
             if format=='onlydata':
+                print("OD")
                 return only_data(resultset)
-                pass
-            raw_data = self.fetch_raw(resultset) 
+                
+            if format=='raw':
+                print("RW")
+                return fetch_raw(resultset) 
         else:
             message='API: No Rows to return. '  
             logger.info(message)
             return None
-
+        raw_data=resultset
         return raw_data
 
 
         
-    def fetch_raw(self, cursor):
+
+
+
+    def fetch_raw_old(self, cursor):
+
         columns = [col[0] for col in cursor.description]
         #print (cursor.rowcount)
         #print (columns)
@@ -173,7 +196,7 @@ class Session():
                 results=dict(zip(columns, row))
             #print(row)
             #print(results)
-        return results
+        return cursor.fetchall()
 
     
     def is_connected(self):
@@ -435,6 +458,12 @@ class Request():
             super().__init__(request)
             repository=Repository.Integracion
             self.properties=self.get_props(request,repository)
+    
+    class Cartera(GenericRequest):
+        def __init__(self,request):
+            super().__init__(request)
+            repository=Repository.Cartera
+            self.properties=self.get_props(request,repository)
 
 
 
@@ -566,8 +595,10 @@ class Generic():
             # convert it to a string
             if isinstance(obj, Decimal):
                 return str(obj)
+
             if isinstance(obj, datetime):
-                return str(obj)
+                return obj.isoformat()
+
             if isinstance(obj, date):
                 return str(obj)
    
