@@ -130,32 +130,31 @@ class Session():
             '''
             Devuelve el resultset en formato de lista sin encabezados.
             '''
-            print("raw");
+            #print("raw");
             results=[]
-            print(type(resultset))
+            #print(type(resultset))
             for a in resultset:
-                print(type(a))
-                print(a)
+             #   print(type(a))
+             #   print(a)
                 results.append(a)
             return results
-
+        print(type(request))
         params=request.parameters
         routine=request.routine
         resultset=self._run(routine,params)
-        print("AQUI")
+        #print("AQUI")
                 
         #print(type(resultset))
         if format=='json':
-                print("JS")
+         #   print("JS")
             return json_str(resultset)
-        if format=='raw':
-            return  fetch_raw(resultset)
+     
         if format=='onlydata':
-                print("OD")
+          #  print("OD")
             return only_data(resultset)
             
         if format=='raw':
-                print("RW")
+           #     print("RW")
                 return fetch_raw(resultset) 
         raw_data=resultset
         return raw_data
@@ -442,6 +441,17 @@ class Request():
             self.properties=self.get_props(request,repository)
 
 
+    class Bulk(GenericRequest):
+        def __init__(self, request,datasource):
+            super().__init__(request)
+            repository=Repository.Integracion
+            self.properties=self.get_props(request,repository)
+            
+        def parse(self,**kwargs):
+
+            pass
+            
+            pass
 
 #---------------------------------------------------------------------------
 # Utilerias
@@ -449,6 +459,28 @@ class Request():
 
 
 class Utils:
+    
+    def paginate(dataset,limit):
+        '''
+        Return a generator as a data subset by paginate a iterable object on set's of <limit> items using a lazy iterator.
+        '''
+        
+        def _yield_row(dataset):                
+           # i=0
+            for row in dataset:
+                yield row
+            pass
+
+        data=[]
+        row_iterator=_yield_row(dataset)
+        for item in row_iterator:
+            data.append(item)
+            if(len(data)>=limit):
+                print("-"*10)
+                row_list=data
+                data=[]
+                yield row_list
+
     def post(data,**kwargs):
         REQUESTS_HEADER = {'Content-type': 'application/json'}
         api_endpoint=kwargs.pop('apiupdateendpoint')
