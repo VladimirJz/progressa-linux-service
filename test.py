@@ -22,7 +22,7 @@ def main():
     db=safi.Session(**settings)
 
     if db.is_available :
-        vencimientos=safi.Request.Cartera('vencimientos').add(FechaInicio='2022-09-01',FechaFin='2022-09-15')
+        vencimientos=safi.Request.Cartera('vencimientos').add(FechaInicio='2022-09-01',FechaFin='2022-09-01')
         
         data=db.get(vencimientos,format='raw')
         #dataset=safi.Utils.to_csv(data,**kwargs)
@@ -32,9 +32,14 @@ def main():
             request_list=[]
             for row in data_block:
                 n+=1
-                #print (row)
+                print (row)
                 #print('vuelta='+str(n))
-                request_list=safi.Request.Bulk('pago-credito',row).parse(CreditoID='CreditoID')
+                request_list=safi.Request.Bulk('pago-credito',row).parse(CreditoID='CreditoID', MontoPagar='Pago',CuentaID='CuentaID')
+                print((request_list))
+                
+                for request in  request_list:
+                    print(request)
+                    print(request.parameters)
                 
                 
 

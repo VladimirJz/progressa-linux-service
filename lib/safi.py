@@ -224,13 +224,14 @@ class Session():
             logger.error("MySQL: Lost connection whit ["+  self.db_name +  "] ")
             exit()
         #cursor=db.cursor()
-        #print(routine)
-        #print(params)
+        print(routine)
+        print(params)
         try:
             #cursor.callproc(routine,params)
             with db.cursor(dictionary=True) as cursor:  
                 cursor.callproc(routine,params)
                 for result in cursor.stored_results():
+                    #print (result)
                     pass
                 #    r
             
@@ -248,12 +249,12 @@ class Session():
 
 
     
-    def _execute_routine(self,routine,to_dict=False):
+    def _execute_routinde(self,routine,to_dict=True):
             db=self.connect()
             if(not db):
                 logger.error("MySQL: Lost connection whit ["+  self.db_name +  "] ")
                 exit()
-            cursor=db.cursor(dictionary=True)
+            cursor=db.cursor(dictionary=to_dict)
             try:
                 cursor.execute(routine)
                 #db.commit()
@@ -283,7 +284,7 @@ class Session():
         ROUTINE="call PGS_MAESTROSALDOS('G','',0,'N') "
         
         args.append(1)
-        result=self._execute_routine(ROUTINE,to_dict=True)
+        result=self.d(ROUTINE,to_dict=True)
         if not result:
             exit()
         if to_list:
@@ -379,6 +380,33 @@ class Request():
             '''
             return [element for element in repository if element['keyword'] == request]
         
+        def add_bulk(self,**kwargs):
+            class ParsedRequest():
+                @property
+                def parameters(self):
+                    return self._parameters
+                
+                @parameters.setter
+                def parameters(self,value):
+                    self._parameters = value
+                    
+                @property
+                def routine(self):
+                    return self._routine
+                
+                @routine.setter
+                def routine(self,value):
+                    self.routine = value
+                def __init__(self,outer,**kwargs):
+                    self._parameters=kwargs
+                    self._routine=outer.routine
+                    pass
+                pass
+
+            parsed=ParsedRequest(self,**kwargs)
+            return ParsedRequest
+            
+
         def add(self,**kwargs):
             '''
             Agrega parametros al 'SAFI.Request' e inicializa con los valores default
@@ -394,7 +422,8 @@ class Request():
                 value= kwargs.get(par['name'],par['default'])
                 raw_parameters.append(value)
             self._parameters= raw_parameters
-            
+            print('raw')
+            print (raw_parameters)
             return self
   
         
@@ -441,17 +470,85 @@ class Request():
             self.properties=self.get_props(request,repository)
 
 
+    
     class Bulk(GenericRequest):
+        
+
+        
+
+
+
+        @property
+        def source(self):
+            return self._source
+        
+        @source.setter
+        def source(self,value):
+            self._source = value
+        
+        
         def __init__(self, request,datasource):
             super().__init__(request)
-            repository=Repository.Integracion
+            repository=Repository.Bulk
             self.properties=self.get_props(request,repository)
+            print(self.properties)
+            self._source=datasource
+
             
         def parse(self,**kwargs):
-
-            pass
+            '''
             
-            pass
+            Mapea cada parametro <Key> de Kwargs con  el valor correspondiente del <value> (como key)
+            dentro del origen de datos <dataset> por cada item del mismo, para generar una lista de 
+            instancias Safi.Request  ejecutables.
+
+            '''
+            raw_parameters=[]
+            print(type(kwargs))
+            #print(self.properties)
+            #unpack=self.properties[0]
+            #self._routine=unpack['routine']
+            #parameter_properties=unpack['parameters']
+            #print (self._source)
+            list_request=[]
+            for row in self._source:
+                #print (row)
+                #for par in kwargs:
+                add_args={}
+                for  key, value in kwargs.items():
+                    #print(key,value)
+                    key_value=row.get(value,-1)
+                    if key_value==-1:
+                        raise Exception ("No existe un elemento: <" + value + "> dentro de la colección, <" + key + "> no puede ser mapeado." );
+                    #print('Key: ' + key +', value: ' + str(key_value))
+                    add_args[key]=key_value
+                
+                print ("add_args", add_args)
+           
+                #self._parameters=
+              
+                #self._parameters=add_args
+                request_item=self.add_bulk(**add_args)
+                print(type(request_item))
+                #print(type(request_item))
+                #request_item.__dict__ = self.__dict__.copy() 
+                #request_item._parameters=add_args;
+                print('objeto_instanciado:' + request_item.routine)
+                list_request.append(request_item)
+                print ('items' + str(list_request.__len__()))
+
+                #value= kwargs.get(par['name'],par['default'])
+                #raw_parameters.append(value)
+            #self._parameters= raw_parameters
+            
+            return (list_request)
+
+    class _BulkParsedRequest(GenericRequest):
+        def __init__(self,request):
+            super().__init__(request)
+            repository=Repository.Bulk
+            self.properties=self.get_props(request,repository)
+        
 
 #---------------------------------------------------------------------------
 # Utilerias

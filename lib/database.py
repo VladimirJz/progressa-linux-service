@@ -1,3 +1,4 @@
+from decimal import Decimal
 class Repository():
     Integracion=[
        {'routine':'PGS_MAESTROSALDOS',
@@ -67,7 +68,7 @@ class Repository():
     ]
     
     Cartera =[
-            {'routine':'VENCIMIENTOSREP',
+            {'routine':'PGSVENCIMIENTOSREP',
             'keyword':'vencimientos',
             'output':'table',
             'parameters':
@@ -197,4 +198,154 @@ class Repository():
                         
                         ]
             }
+            ]
+    Bulk =[
+            {'routine':'PAGOCREDITOPRO',
+            'keyword':'pago-credito',
+            'output':'table',
+            'parameters':
+                        [{  'order':1,
+                            'name':'CreditoID',
+                            'type': int,
+                            'default':0,
+                            'required':True 
+                        },
+                        {  'order':2,
+                            'name':'CuentaID',
+                            'type':int,
+                            'default':0,
+                            'required':True 
+                        },
+                        {  'order': 3,
+                            'name':'MontoPagar',
+                            'type':Decimal,
+                            'default':0,
+                            'required':True 
+                        },
+                        {  'order': 4,
+                            'name':'MonedaID',
+                            'type':int,
+                            'default':1,# Pesos Mexicanos
+                            'required':False 
+                        },
+                        {  'order': 5,
+                            'name':'EsPrepago',
+                            'type':str,
+                            'default':'N',# No es prepago
+                            'required':False 
+                        },
+                        {  'order':6,
+                            'name':'EsFiniquito',
+                            'type':str,
+                            'default':'N',# No es finiquito
+                            'required':False 
+                        },
+                        {  'order':7,
+                            'name':'EmpresaID',
+                            'type':int,
+                            'default':1,# Empresa predeterminada
+                            'required':False 
+                        },
+                        {  'order':8,
+                            'name':'Salida',
+                            'type':str,
+                            'default':'S',# Global
+                            'required':False 
+                        },
+                        {  'order':9,
+                            'name':'MaestroPoliza',
+                            'type':str,
+                            'default':'S',# Genera un encabezado de poliza.
+                            'required':False 
+                        },
+                        {  'order':10,
+                            'name':'MontoPagado',
+                            'type':Decimal,
+                            'default':0,# Global
+                            'required':False
+                        },
+                        {  'order':11,
+                            'name':'@PolizaID',
+                            'type':int,
+                            'default':1,# Global
+                            'required':False 
+                        },
+                        {  'order':12,
+                            'name':'@NumErr',
+                            'type':int,
+                            'default':0,# Global
+                            'required':False 
+                        },
+                        {  'order':13,
+                            'name':'@ErrMen',
+                            'type':int,
+                            'default':0,# Global
+                            'required':False 
+                        },
+                        {  'order':14,
+                            'name':'@Consecutivo',
+                            'type':int,
+                            'default':1,# Global
+                            'required':False 
+                        },
+                        {  'order':15,
+                            'name':'ModoPago',
+                            'type':str,
+                            'default':'E',# Efectivo
+                            'required':False 
+                        },
+
+                      {  'order':16,
+                            'name':'Origen',
+                            'type':str,
+                            'default':'',# Global
+                            'required':False 
+                        },
+                      {  'order':17,
+                            'name':'RespaldaCred',
+                            'type':str,
+                            'default':'S',# Global
+                            'required':False 
+                        },
+
+                      {  'order':18,
+                            'name':'Usuario',
+                            'type':int,
+                            'default':1,
+                            'required':False 
+                        },
+
+                      {  'order':19,
+                            'name':'FechaActual',
+                            'type':str,
+                            'default':'1900-01-01',
+                            'required':False 
+                        },                   
+                        {  'order':20,
+                            'name':'IP',
+                            'type':str,
+                            'default':'127.0.0.1',
+                            'required':False 
+                        },
+                        {  'order':21,
+                            'name':'ProgramaID',
+                            'type':str,
+                            'default':'API',
+                            'required':False 
+                        },
+                        {  'order':22,
+                            'name':'Sucursal',
+                            'type':int,
+                            'default':1,
+                            'required':False 
+                        },
+                        {  'order':23,
+                            'name':'Transaccion',
+                            'type':int,
+                            'default':1,
+                            'required':False 
+                        },
+                        
+                        ]
+            },
             ]
