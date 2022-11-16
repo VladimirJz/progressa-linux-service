@@ -224,8 +224,8 @@ class Session():
             logger.error("MySQL: Lost connection whit ["+  self.db_name +  "] ")
             exit()
         #cursor=db.cursor()
-        print(routine)
-        print(params)
+        #print(routine)
+        #print(params)
         try:
             #cursor.callproc(routine,params)
             with db.cursor(dictionary=True) as cursor:  
@@ -234,7 +234,8 @@ class Session():
                     #print (result)
                     pass
                 #    r
-            
+            db.commit()
+            print('commit')
                 #print(rows)
                 #print('tupoCursor:',rows)
         except mysql.connector.Error as err:
@@ -373,6 +374,7 @@ class Request():
             self._properties=''
             self._parameters=[]
             self._routine=''
+            self._request=request
         
         def get_props(self,request, repository):
             '''
@@ -405,9 +407,34 @@ class Request():
 
             parsed=ParsedRequest(self,**kwargs)
             return ParsedRequest
-            
+        @classmethod    
+        def new(cls,**add_args):
+            print(cls)
+            print(cls.routine)
+            return  cls.__init__()
+
 
         def add(self,**kwargs):
+            '''
+            Agrega parametros al 'SAFI.Request' e inicializa con los valores default
+            aquellos que no son proporcionados explicitamente.
+            '''
+            #print(self)
+            raw_parameters=[]
+            #print(self.properties[0])
+            unpack=self.properties[0]
+            self._routine=unpack['routine']
+            parameter_properties=unpack['parameters']
+            for par in parameter_properties:
+                #print(par['name'])
+                value= kwargs.get(par['name'],par['default'])
+                raw_parameters.append(value)
+            self._parameters= raw_parameters
+            #print('raw')
+            #print (raw_parameters)
+            return self
+  
+        def add_org(self,**kwargs):
             '''
             Agrega parametros al 'SAFI.Request' e inicializa con los valores default
             aquellos que no son proporcionados explicitamente.
@@ -422,10 +449,17 @@ class Request():
                 value= kwargs.get(par['name'],par['default'])
                 raw_parameters.append(value)
             self._parameters= raw_parameters
-            print('raw')
-            print (raw_parameters)
+            #print('raw')
+            #print (raw_parameters)
             return self
-  
+
+        @property
+        def request(self):
+            return self._request
+        
+        @request.setter
+        def request(self,value):
+            self._request = value
         
         @property
         def properties(self):
@@ -473,11 +507,6 @@ class Request():
     
     class Bulk(GenericRequest):
         
-
-        
-
-
-
         @property
         def source(self):
             return self._source
@@ -504,7 +533,7 @@ class Request():
 
             '''
             raw_parameters=[]
-            print(type(kwargs))
+            #print(type(kwargs))
             #print(self.properties)
             #unpack=self.properties[0]
             #self._routine=unpack['routine']
@@ -523,19 +552,24 @@ class Request():
                     #print('Key: ' + key +', value: ' + str(key_value))
                     add_args[key]=key_value
                 
-                print ("add_args", add_args)
+                #print ("add_args", add_args)
+                #request_item=self.add(**add_args)
+                request_item=self.__class__(self._request,self._source)
+                r=request_item.add(**add_args)
+                #print(type(r))
            
+
                 #self._parameters=
               
                 #self._parameters=add_args
-                request_item=self.add_bulk(**add_args)
-                print(type(request_item))
+                #request_item=self.add_bulk(**add_args)
+                #print(type(request_item))
                 #print(type(request_item))
                 #request_item.__dict__ = self.__dict__.copy() 
                 #request_item._parameters=add_args;
-                print('objeto_instanciado:' + request_item.routine)
+                #print('objeto_instanciado:' + request_item.routine)
                 list_request.append(request_item)
-                print ('items' + str(list_request.__len__()))
+                #print ('items' + str(list_request.__len__()))
 
                 #value= kwargs.get(par['name'],par['default'])
                 #raw_parameters.append(value)
